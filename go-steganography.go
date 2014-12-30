@@ -43,6 +43,7 @@ func main() {
 
 }
 
+// Convert given image to RGBA image
 func imageToRGBA(src image.Image) *image.RGBA {
 	b := src.Bounds()
 
@@ -57,6 +58,7 @@ func imageToRGBA(src image.Image) *image.RGBA {
 	return m
 }
 
+// Read and return an image at the given path
 func decodeImage(filename string) image.Image {
 	inFile, err := os.Open(filename)
 
@@ -74,6 +76,7 @@ func decodeImage(filename string) image.Image {
 	return img
 }
 
+// Will write out a given image to a given path in filename
 func encodePNG(filename string, img image.Image) {
 	fo, err := os.Create(filename)
 
@@ -88,8 +91,6 @@ func encodePNG(filename string, img image.Image) {
 	defer writer.Flush()
 
 	err = png.Encode(writer, img)
-
-	fmt.Println("Wrote to", filename)
 }
 
 // Given an image will find how many bytes can be stored in that image using least significant bit encoding
