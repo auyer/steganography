@@ -23,6 +23,14 @@ func main() {
 
 	//c := rgbIm.At(0, 0)
 
+	var b byte = 58
+
+	print("LSB: ", getLSB(b), "\n")
+	setLSB(&b, true)
+	print("LSB: ", getLSB(b), "\n")
+
+	print("MAX: ", maxEncodeSize(rgbIm), "\n")
+
 	var c color.RGBA
 
 	for x := 0; x < 20; x++ {
@@ -82,4 +90,28 @@ func encodePNG(filename string, img image.Image) {
 	err = png.Encode(writer, img)
 
 	fmt.Println("Wrote to", filename)
+}
+
+func maxEncodeSize(img image.Image) int {
+
+	width := img.Bounds().Dx()
+	height := img.Bounds().Dy()
+
+	return int(((width * height * 3) / 8))
+}
+
+func getLSB(b byte) byte {
+
+	b &= 1
+	return b
+
+}
+
+func setLSB(b *byte, bit bool) {
+	if bit == true {
+		*b = *b | 1
+	} else if bit == false {
+		var mask byte = 0xFE
+		*b = *b & mask
+	}
 }
