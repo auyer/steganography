@@ -92,6 +92,7 @@ func encodePNG(filename string, img image.Image) {
 	fmt.Println("Wrote to", filename)
 }
 
+// Given an image will find how many bytes can be stored in that image using least significant bit encoding
 func maxEncodeSize(img image.Image) int {
 
 	width := img.Bounds().Dx()
@@ -102,10 +103,8 @@ func maxEncodeSize(img image.Image) int {
 
 // Given a byte, will return the least significant bit of that byte
 func getLSB(b byte) byte {
-
 	b &= 1
 	return b
-
 }
 
 // Given a byte will set that byte's least significant bit to a given value (where true is 1 and false is 0)
