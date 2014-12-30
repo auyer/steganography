@@ -100,6 +100,7 @@ func maxEncodeSize(img image.Image) int {
 	return int(((width * height * 3) / 8))
 }
 
+// Given a byte, will return the least significant bit of that byte
 func getLSB(b byte) byte {
 
 	b &= 1
@@ -107,6 +108,7 @@ func getLSB(b byte) byte {
 
 }
 
+// Given a byte will set that byte's least significant bit to a given value (where true is 1 and false is 0)
 func setLSB(b *byte, bit bool) {
 	if bit == true {
 		*b = *b | 1
