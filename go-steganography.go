@@ -36,11 +36,30 @@ func main() {
 	outputFile = "output.png"
 	messageFile = "message.txt"
 
-	msg := decodeMessageFromPicture()
+	encodeString("hello world")
 
-	for i := range msg {
-		fmt.Printf("%c", msg[i])
+	//msg := decodeMessageFromPicture()
 
+	//for i := range msg {
+	//	fmt.Printf("%c ", msg[i])
+
+	//}
+
+	rgbIm := imageToRGBA(decodeImage(outputFile))
+
+	width := rgbIm.Bounds().Dx()
+	height := rgbIm.Bounds().Dy()
+
+	var c color.RGBA
+
+	//message = append(message, 0)
+
+	for x := 0; x < width; x++ {
+		for y := 0; y < height; y++ {
+
+			c = rgbIm.RGBAAt(x, y)
+			fmt.Println("%d %d %d\n", c.R, c.G, c.B)
+		}
 	}
 
 }
@@ -55,12 +74,8 @@ func decodeMessageFromPicture() (message []byte) {
 	width := rgbIm.Bounds().Dx()
 	height := rgbIm.Bounds().Dy()
 
-	print("(W, H): (", width, ", ", height, ")\n")
-
 	var c color.RGBA
 	var lsb byte
-
-	print("Hey\n")
 
 	message = append(message, 0)
 
@@ -68,9 +83,9 @@ func decodeMessageFromPicture() (message []byte) {
 		for y := 0; y < height; y++ {
 
 			c = rgbIm.RGBAAt(x, y)
+
 			lsb = getLSB(byte(c.R))
 			message[byteIndex] = setBitInByte(message[byteIndex], bitIndex, lsb)
-
 			bitIndex++
 
 			if bitIndex > 7 {
