@@ -19,13 +19,10 @@ var pictureInputFile string
 var pictureOutputFile string
 var messageInputFile string
 var messageOutputFile string
-var lengthOfMessage int
 
 var read bool
 var write bool
 var help bool
-
-var ascii bool
 
 func init() {
 
@@ -39,8 +36,6 @@ func init() {
 	flag.StringVar(&messageOutputFile, "msgo", "", "Path to the message output file")
 
 	flag.BoolVar(&help, "help", false, "Help")
-
-	flag.BoolVar(&ascii, "ascii", false, "For use in read mode. Specifies if the anticipated message is in textual form.")
 
 	flag.Parse()
 }
@@ -74,39 +69,20 @@ func main() {
 	if read {
 		msg := decodeMessageFromPicture() // Read the message from the picture file
 
-		// if the message is textual in nature eliminate excess non-ascii characters from the message
-		if ascii == true {
-			var lastIndexOfMsg int = len(msg)
-
-			// iterate through every character in the message
-			for i := range msg {
-				// once a non-ascii character has been detected, set this as the last index of the message
-				if msg[i] < 32 || 127 < msg[i] {
-					lastIndexOfMsg = i
-					break
-				}
-			}
-			msg = msg[:lastIndexOfMsg] // truncate the message to eliminate all the garbage values off the end
-		}
-
 		// if the user specifies a location to write the message to...
 		if messageOutputFile != "" {
-
 			// write the message to the given output file
 			err := ioutil.WriteFile(messageOutputFile, msg, 0644)
 
 			if err != nil {
 				fmt.Println("There was an error writing to file: ", messageOutputFile)
 			}
-
 		} else { // otherwise, print the message to STDOUT
 			for i := range msg {
 				fmt.Printf("%c", msg[i])
 			}
 		}
-
 	}
-
 }
 
 // using LSB steganography, decode the message from the picture and return it as a sequence of bytes
@@ -300,10 +276,8 @@ func encodePNG(filename string, img image.Image) {
 
 // given an image will find how many bytes can be stored in that image using least significant bit encoding
 func maxEncodeSize(img image.Image) int {
-
 	width := img.Bounds().Dx()
 	height := img.Bounds().Dy()
-
 	return int(((width * height * 3) / 8))
 }
 
@@ -314,7 +288,6 @@ func getLSB(b byte) byte {
 	} else {
 		return 1
 	}
-
 	return b
 }
 
@@ -377,6 +350,5 @@ func getNextBitFromString(s string) (byte, error) {
 		offsetInBitsIntoByte = 0
 		offsetInBytes++
 	}
-
 	return choiceBit, nil
 }
