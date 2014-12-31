@@ -8,58 +8,38 @@ import (
 	"image/color"
 	"image/draw"
 	"image/png"
-	//"io/ioutil"
+	"io/ioutil"
 	"log"
 	"os"
 	"unicode/utf8"
 )
 
-type errorString struct {
-	s string
-}
-
-func (e *errorString) Error() string {
-	return e.s
-}
-
-func New(text string) error {
-	return &errorString{text}
-}
-
-var inputFile string
-var outputFile string
-var messageFile string
+var pictureInputFile string
+var pictureOutputFile string
+var messageInputFile string
+var messageOutputFile string
 
 func main() {
 
-	inputFile = "input.png"
-	outputFile = "output.png"
-	messageFile = "message.txt"
+	pictureInputFile = "input.png"
+	pictureOutputFile = "output.png"
+	messageInputFile = "message.txt"
+	messageOutputFile = "out.txt"
 
-	encodeString("hello world")
+	message, err := ioutil.ReadFile(messageInputFile)
+
+	if err != nil {
+		print("Error reading from file!!!")
+		return
+	}
+
+	fmt.Println("LENGTH", len(message))
+
+	encodeString(string(message))
 
 	msg := decodeMessageFromPicture()
 
-	for i := 0; i < 100; i++ {
-		fmt.Printf("%c", msg[i])
-	}
-
-	/*rgbIm := imageToRGBA(decodeImage(inputFile))
-
-	width := rgbIm.Bounds().Dx()
-	height := rgbIm.Bounds().Dy()
-
-	var c color.RGBA
-
-	//message = append(message, 0)
-
-	for x := 0; x < width; x++ {
-		for y := 0; y < height; y++ {
-
-			c = rgbIm.RGBAAt(x, y)
-			fmt.Println(c.R, c.G, c.B)
-		}
-	} */
+	err = ioutil.WriteFile(messageOutputFile, msg, 0644)
 
 }
 
@@ -68,7 +48,7 @@ func decodeMessageFromPicture() (message []byte) {
 	var byteIndex int = 0
 	var bitIndex int = 0
 
-	rgbIm := imageToRGBA(decodeImage(outputFile))
+	rgbIm := imageToRGBA(decodeImage(pictureOutputFile))
 
 	width := rgbIm.Bounds().Dx()
 	height := rgbIm.Bounds().Dy()
@@ -119,9 +99,10 @@ func decodeMessageFromPicture() (message []byte) {
 
 }
 
+// Encodes a given string into the input image using least significant bit encryption
 func encodeString(message string) {
 
-	rgbIm := imageToRGBA(decodeImage(inputFile))
+	rgbIm := imageToRGBA(decodeImage(pictureInputFile))
 
 	var messageLength int = utf8.RuneCountInString(message)
 	var width int = rgbIm.Bounds().Dx()
@@ -145,7 +126,7 @@ func encodeString(message string) {
 			bit, err = getNextBitFromString(message)
 			if err != nil {
 				rgbIm.SetRGBA(x, y, c)
-				encodePNG(outputFile, rgbIm)
+				encodePNG(pictureOutputFile, rgbIm)
 				return
 			}
 			setLSB(&c.R, bit)
@@ -153,7 +134,7 @@ func encodeString(message string) {
 			bit, err = getNextBitFromString(message)
 			if err != nil {
 				rgbIm.SetRGBA(x, y, c)
-				encodePNG(outputFile, rgbIm)
+				encodePNG(pictureOutputFile, rgbIm)
 				return
 			}
 			setLSB(&c.G, bit)
@@ -161,7 +142,7 @@ func encodeString(message string) {
 			bit, err = getNextBitFromString(message)
 			if err != nil {
 				rgbIm.SetRGBA(x, y, c)
-				encodePNG(outputFile, rgbIm)
+				encodePNG(pictureOutputFile, rgbIm)
 				return
 			}
 			setLSB(&c.B, bit)
@@ -172,7 +153,7 @@ func encodeString(message string) {
 		}
 	}
 
-	encodePNG(outputFile, rgbIm)
+	encodePNG(pictureOutputFile, rgbIm)
 }
 
 // Convert given image to RGBA image
