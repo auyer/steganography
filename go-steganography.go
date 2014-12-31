@@ -76,7 +76,9 @@ func main() {
 		// If the message is textual in nature eliminate excess non-ascii characters from the message
 		if ascii == true {
 			var lastIndexOfImg int = len(msg)
-			for i := 0; i < lastIndexOfImg; i++ {
+
+			// iterate through every character in the message
+			for i := range msg {
 				if msg[i] < 32 || 127 < msg[i] {
 					lastIndexOfImg = i
 					break
