@@ -19,6 +19,7 @@ var pictureInputFile string
 var pictureOutputFile string
 var messageInputFile string
 var messageOutputFile string
+var lengthOfMessage int
 
 var read bool
 var write bool
@@ -122,6 +123,8 @@ func decodeMessageFromPicture() (message []byte) {
 	var c color.RGBA
 	var lsb byte
 
+	var msgLen int = 0
+
 	message = append(message, 0)
 
 	// iterate through every pixel in the image and stitch together the message bit by bit
@@ -138,6 +141,11 @@ func decodeMessageFromPicture() (message []byte) {
 			if bitIndex > 7 { // when we have filled up a byte, move on to the next byte
 				bitIndex = 0
 				byteIndex++
+
+				if (byteIndex > msgLen) && msgLen != 0 {
+					return message[1:]
+				}
+
 				message = append(message, 0)
 			}
 
@@ -147,8 +155,18 @@ func decodeMessageFromPicture() (message []byte) {
 			bitIndex++
 
 			if bitIndex > 7 {
+
+				if msgLen == 0 {
+					msgLen = int(message[0])
+				}
+
 				bitIndex = 0
 				byteIndex++
+
+				if (byteIndex > msgLen) && msgLen != 0 {
+					return message[1:]
+				}
+
 				message = append(message, 0)
 			}
 
@@ -160,6 +178,11 @@ func decodeMessageFromPicture() (message []byte) {
 			if bitIndex > 7 {
 				bitIndex = 0
 				byteIndex++
+
+				if (byteIndex > msgLen) && msgLen != 0 {
+					return message[1:]
+				}
+
 				message = append(message, 0)
 			}
 		}
@@ -176,7 +199,7 @@ func encodeString(message string) {
 	var width int = rgbIm.Bounds().Dx()
 	var height int = rgbIm.Bounds().Dy()
 
-	if maxEncodeSize(rgbIm) < messageLength {
+	if maxEncodeSize(rgbIm) < messageLength+1 {
 		print("Error! The message you are trying to encode is too large.")
 		return
 	}
@@ -185,6 +208,8 @@ func encodeString(message string) {
 	var offsetIntoMessage int = 0
 	var bit byte
 	var err error
+
+	message = string(len(message)) + message
 
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
