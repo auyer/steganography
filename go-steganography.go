@@ -38,14 +38,13 @@ func main() {
 
 	encodeString("hello world")
 
-	//msg := decodeMessageFromPicture()
+	msg := decodeMessageFromPicture()
 
-	//for i := range msg {
-	//	fmt.Printf("%c ", msg[i])
+	for i := 0; i < 100; i++ {
+		fmt.Printf("%c", msg[i])
+	}
 
-	//}
-
-	rgbIm := imageToRGBA(decodeImage(outputFile))
+	/*rgbIm := imageToRGBA(decodeImage(inputFile))
 
 	width := rgbIm.Bounds().Dx()
 	height := rgbIm.Bounds().Dy()
@@ -58,9 +57,9 @@ func main() {
 		for y := 0; y < height; y++ {
 
 			c = rgbIm.RGBAAt(x, y)
-			fmt.Println("%d %d %d\n", c.R, c.G, c.B)
+			fmt.Println(c.R, c.G, c.B)
 		}
-	}
+	} */
 
 }
 
@@ -84,7 +83,7 @@ func decodeMessageFromPicture() (message []byte) {
 
 			c = rgbIm.RGBAAt(x, y)
 
-			lsb = getLSB(byte(c.R))
+			lsb = getLSB(c.R)
 			message[byteIndex] = setBitInByte(message[byteIndex], bitIndex, lsb)
 			bitIndex++
 
@@ -94,7 +93,7 @@ func decodeMessageFromPicture() (message []byte) {
 				message = append(message, 0)
 			}
 
-			lsb = getLSB(byte(c.G))
+			lsb = getLSB(c.G)
 			message[byteIndex] = setBitInByte(message[byteIndex], bitIndex, lsb)
 			bitIndex++
 
@@ -104,7 +103,7 @@ func decodeMessageFromPicture() (message []byte) {
 				message = append(message, 0)
 			}
 
-			lsb = getLSB(byte(c.B))
+			lsb = getLSB(c.B)
 			message[byteIndex] = setBitInByte(message[byteIndex], bitIndex, lsb)
 			bitIndex++
 
@@ -237,7 +236,12 @@ func maxEncodeSize(img image.Image) int {
 
 // Given a byte, will return the least significant bit of that byte
 func getLSB(b byte) byte {
-	b &= 1
+	if b%2 == 0 {
+		return 0
+	} else {
+		return 1
+	}
+
 	return b
 }
 
@@ -268,9 +272,9 @@ func setBitInByte(b byte, indexInByte int, bit byte) byte {
 
 	var mask byte = 0x80
 	mask = mask >> uint(indexInByte)
-	mask = ^mask
 
 	if bit == 0 {
+		mask = ^mask
 		b = b & mask
 	} else if bit == 1 {
 		b = b | mask
