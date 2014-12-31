@@ -51,10 +51,10 @@ func main() {
 			fmt.Println("go-steg has two modes: write and read:")
 
 			fmt.Println("- Write: take a message and write it into a specified location")
-			fmt.Println("\t+ EX: ./steg -w -msgi message.txt -imgi output.png")
+			fmt.Println("\t+ EX: ./stego -w -msgi message.txt -imgi plain.png -imgo secret.png")
 
 			fmt.Println("- Read: take a picture and read the message from it")
-			fmt.Println("\t+ EX: ./steg -r -imgi input.png -msgo out.txt")
+			fmt.Println("\t+ EX: ./stego -r -imgi secret.png -msgo secret.txt")
 		} else if !read || !write {
 			fmt.Println("You must specify either the read or write flag. See -help for more information\n")
 		}
