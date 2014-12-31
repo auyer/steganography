@@ -8,13 +8,11 @@ import (
 	"image/color"
 	"image/draw"
 	"image/png"
+	//"io/ioutil"
 	"log"
 	"os"
 	"unicode/utf8"
 )
-
-var inputFile string
-var outputFile string
 
 type errorString struct {
 	s string
@@ -28,12 +26,82 @@ func New(text string) error {
 	return &errorString{text}
 }
 
+var inputFile string
+var outputFile string
+var messageFile string
+
 func main() {
 
 	inputFile = "input.png"
 	outputFile = "output.png"
+	messageFile = "message.txt"
 
-	encodeString("Hello world this is Ethan Welsh and this is my experiment")
+	msg := decodeMessageFromPicture()
+
+	for i := range msg {
+		fmt.Printf("%c", msg[i])
+
+	}
+
+}
+
+func decodeMessageFromPicture() (message []byte) {
+
+	var byteIndex int = 0
+	var bitIndex int = 0
+
+	rgbIm := imageToRGBA(decodeImage(outputFile))
+
+	width := rgbIm.Bounds().Dx()
+	height := rgbIm.Bounds().Dy()
+
+	print("(W, H): (", width, ", ", height, ")\n")
+
+	var c color.RGBA
+	var lsb byte
+
+	print("Hey\n")
+
+	message = append(message, 0)
+
+	for x := 0; x < width; x++ {
+		for y := 0; y < height; y++ {
+
+			c = rgbIm.RGBAAt(x, y)
+			lsb = getLSB(byte(c.R))
+			message[byteIndex] = setBitInByte(message[byteIndex], bitIndex, lsb)
+
+			bitIndex++
+
+			if bitIndex > 7 {
+				bitIndex = 0
+				byteIndex++
+				message = append(message, 0)
+			}
+
+			lsb = getLSB(byte(c.G))
+			message[byteIndex] = setBitInByte(message[byteIndex], bitIndex, lsb)
+			bitIndex++
+
+			if bitIndex > 7 {
+				bitIndex = 0
+				byteIndex++
+				message = append(message, 0)
+			}
+
+			lsb = getLSB(byte(c.B))
+			message[byteIndex] = setBitInByte(message[byteIndex], bitIndex, lsb)
+			bitIndex++
+
+			if bitIndex > 7 {
+				bitIndex = 0
+				byteIndex++
+				message = append(message, 0)
+			}
+		}
+	}
+
+	return
 
 }
 
@@ -168,6 +236,7 @@ func setLSB(b *byte, bit byte) {
 	}
 }
 
+// Given a bit will return a bit from that byte
 func getBitFromByte(b byte, indexInByte int) byte {
 	b = b << uint(indexInByte)
 	var mask byte = 0x80
@@ -178,6 +247,20 @@ func getBitFromByte(b byte, indexInByte int) byte {
 		return 1
 	}
 	return 0
+}
+
+func setBitInByte(b byte, indexInByte int, bit byte) byte {
+
+	var mask byte = 0x80
+	mask = mask >> uint(indexInByte)
+	mask = ^mask
+
+	if bit == 0 {
+		b = b & mask
+	} else if bit == 1 {
+		b = b | mask
+	}
+	return b
 }
 
 var offsetInBytes int = 0
