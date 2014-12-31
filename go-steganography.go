@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"image"
 	"image/color"
@@ -9,38 +10,87 @@ import (
 	"image/png"
 	"log"
 	"os"
+	"unicode/utf8"
 )
 
 var inputFile string
 var outputFile string
+
+type errorString struct {
+	s string
+}
+
+func (e *errorString) Error() string {
+	return e.s
+}
+
+func New(text string) error {
+	return &errorString{text}
+}
 
 func main() {
 
 	inputFile = "input.png"
 	outputFile = "output.png"
 
+	encodeString("Hello world this is Ethan Welsh and this is my experiment")
+
+}
+
+func encodeString(message string) {
+
 	rgbIm := imageToRGBA(decodeImage(inputFile))
 
-	//c := rgbIm.At(0, 0)
+	var messageLength int = utf8.RuneCountInString(message)
+	var width int = rgbIm.Bounds().Dx()
+	var height int = rgbIm.Bounds().Dy()
 
-	var b byte = 58
-
-	print("LSB: ", getLSB(b), "\n")
-	setLSB(&b, true)
-	print("LSB: ", getLSB(b), "\n")
-
-	print("MAX: ", maxEncodeSize(rgbIm), "\n")
+	if maxEncodeSize(rgbIm) < messageLength {
+		print("Error! The message you are trying to encode is too large.")
+		return
+	}
 
 	var c color.RGBA
+	var offsetIntoMessage int = 0
+	var bit byte
+	var err error
 
-	for x := 0; x < 20; x++ {
-		for y := 0; y < 20; y++ {
+	for x := 0; x < width; x++ {
+		for y := 0; y < height; y++ {
+
+			c = rgbIm.RGBAAt(x, y)
+
+			bit, err = getNextBitFromString(message)
+			if err != nil {
+				rgbIm.SetRGBA(x, y, c)
+				encodePNG(outputFile, rgbIm)
+				return
+			}
+			setLSB(&c.R, bit)
+
+			bit, err = getNextBitFromString(message)
+			if err != nil {
+				rgbIm.SetRGBA(x, y, c)
+				encodePNG(outputFile, rgbIm)
+				return
+			}
+			setLSB(&c.G, bit)
+
+			bit, err = getNextBitFromString(message)
+			if err != nil {
+				rgbIm.SetRGBA(x, y, c)
+				encodePNG(outputFile, rgbIm)
+				return
+			}
+			setLSB(&c.B, bit)
+
 			rgbIm.SetRGBA(x, y, c)
+
+			offsetIntoMessage++
 		}
 	}
 
 	encodePNG(outputFile, rgbIm)
-
 }
 
 // Convert given image to RGBA image
@@ -109,11 +159,48 @@ func getLSB(b byte) byte {
 }
 
 // Given a byte will set that byte's least significant bit to a given value (where true is 1 and false is 0)
-func setLSB(b *byte, bit bool) {
-	if bit == true {
+func setLSB(b *byte, bit byte) {
+	if bit == 1 {
 		*b = *b | 1
-	} else if bit == false {
+	} else if bit == 0 {
 		var mask byte = 0xFE
 		*b = *b & mask
 	}
+}
+
+func getBitFromByte(b byte, indexInByte int) byte {
+	b = b << uint(indexInByte)
+	var mask byte = 0x80
+
+	var bit byte = mask & b
+
+	if bit == 128 {
+		return 1
+	}
+	return 0
+}
+
+var offsetInBytes int = 0
+var offsetInBitsIntoByte int = 0
+
+func getNextBitFromString(s string) (byte, error) {
+
+	lenOfString := len(s)
+
+	if offsetInBytes >= lenOfString {
+		return 0, errors.New("Error! Can't offset that far into the string.")
+	}
+
+	byteArray := []byte(s)
+	choiceByte := byteArray[offsetInBytes]
+	choiceBit := getBitFromByte(choiceByte, offsetInBitsIntoByte)
+
+	offsetInBitsIntoByte++
+
+	if offsetInBitsIntoByte >= 8 {
+		offsetInBitsIntoByte = 0
+		offsetInBytes++
+	}
+
+	return choiceBit, nil
 }
