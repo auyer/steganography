@@ -62,40 +62,43 @@ func main() {
 	}
 
 	if write {
-		message, err := ioutil.ReadFile(messageInputFile)
+		message, err := ioutil.ReadFile(messageInputFile) // Read the message from the message file
 		if err != nil {
 			print("Error reading from file!!!")
 			return
 		}
-		encodeString(string(message))
+		encodeString(string(message)) // Encode the message into the image file
 	}
 
 	if read {
-		msg := decodeMessageFromPicture()
+		msg := decodeMessageFromPicture() // Read the message from the picture file
 
-		// If the message is textual in nature eliminate excess non-ascii characters from the message
+		// if the message is textual in nature eliminate excess non-ascii characters from the message
 		if ascii == true {
-			var lastIndexOfImg int = len(msg)
+			var lastIndexOfMsg int = len(msg)
 
 			// iterate through every character in the message
 			for i := range msg {
+				// once a non-ascii character has been detected, set this as the last index of the message
 				if msg[i] < 32 || 127 < msg[i] {
-					lastIndexOfImg = i
+					lastIndexOfMsg = i
 					break
 				}
 			}
-			msg = msg[:lastIndexOfImg]
+			msg = msg[:lastIndexOfMsg] // truncate the message to eliminate all the garbage values off the end
 		}
 
+		// if the user specifies a location to write the message to...
 		if messageOutputFile != "" {
 
+			// write the message to the given output file
 			err := ioutil.WriteFile(messageOutputFile, msg, 0644)
 
 			if err != nil {
 				fmt.Println("There was an error writing to file: ", messageOutputFile)
 			}
 
-		} else {
+		} else { // otherwise, print the message to STDOUT
 			for i := range msg {
 				fmt.Printf("%c", msg[i])
 			}
@@ -105,6 +108,7 @@ func main() {
 
 }
 
+// using LSB steganography, decode the message from the picture and return it as a sequence of bytes
 func decodeMessageFromPicture() (message []byte) {
 
 	var byteIndex int = 0
@@ -120,21 +124,24 @@ func decodeMessageFromPicture() (message []byte) {
 
 	message = append(message, 0)
 
+	// iterate through every pixel in the image and stitch together the message bit by bit
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
 
-			c = rgbIm.RGBAAt(x, y)
+			c = rgbIm.RGBAAt(x, y) // get the color of the pixel
 
-			lsb = getLSB(c.R)
-			message[byteIndex] = setBitInByte(message[byteIndex], bitIndex, lsb)
+			/*  RED  */
+			lsb = getLSB(c.R)                                                    // get the least significant bit from the red component of this pixel
+			message[byteIndex] = setBitInByte(message[byteIndex], bitIndex, lsb) // add this bit to the message
 			bitIndex++
 
-			if bitIndex > 7 {
+			if bitIndex > 7 { // when we have filled up a byte, move on to the next byte
 				bitIndex = 0
 				byteIndex++
 				message = append(message, 0)
 			}
 
+			/*  GREEN  */
 			lsb = getLSB(c.G)
 			message[byteIndex] = setBitInByte(message[byteIndex], bitIndex, lsb)
 			bitIndex++
@@ -145,6 +152,7 @@ func decodeMessageFromPicture() (message []byte) {
 				message = append(message, 0)
 			}
 
+			/*  BLUE  */
 			lsb = getLSB(c.B)
 			message[byteIndex] = setBitInByte(message[byteIndex], bitIndex, lsb)
 			bitIndex++
@@ -156,12 +164,10 @@ func decodeMessageFromPicture() (message []byte) {
 			}
 		}
 	}
-
 	return
-
 }
 
-// Encodes a given string into the input image using least significant bit encryption
+// encodes a given string into the input image using least significant bit encryption
 func encodeString(message string) {
 
 	rgbIm := imageToRGBA(decodeImage(pictureInputFile))
@@ -183,16 +189,18 @@ func encodeString(message string) {
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
 
-			c = rgbIm.RGBAAt(x, y)
+			c = rgbIm.RGBAAt(x, y) // get the color at this pixel
 
+			/*  RED  */
 			bit, err = getNextBitFromString(message)
-			if err != nil {
+			if err != nil { // if we don't have any more bits left in our message
 				rgbIm.SetRGBA(x, y, c)
-				encodePNG(pictureOutputFile, rgbIm)
+				encodePNG(pictureOutputFile, rgbIm) // write the encoded file out
 				return
 			}
 			setLSB(&c.R, bit)
 
+			/*  GREEN  */
 			bit, err = getNextBitFromString(message)
 			if err != nil {
 				rgbIm.SetRGBA(x, y, c)
@@ -201,6 +209,7 @@ func encodeString(message string) {
 			}
 			setLSB(&c.G, bit)
 
+			/*  BLUE  */
 			bit, err = getNextBitFromString(message)
 			if err != nil {
 				rgbIm.SetRGBA(x, y, c)
@@ -218,7 +227,7 @@ func encodeString(message string) {
 	encodePNG(pictureOutputFile, rgbIm)
 }
 
-// Convert given image to RGBA image
+// convert given image to RGBA image
 func imageToRGBA(src image.Image) *image.RGBA {
 	b := src.Bounds()
 
@@ -233,7 +242,7 @@ func imageToRGBA(src image.Image) *image.RGBA {
 	return m
 }
 
-// Read and return an image at the given path
+// read and return an image at the given path
 func decodeImage(filename string) image.Image {
 	inFile, err := os.Open(filename)
 
@@ -242,15 +251,12 @@ func decodeImage(filename string) image.Image {
 	}
 
 	defer inFile.Close()
-
 	reader := bufio.NewReader(inFile)
-
 	img, _, err := image.Decode(reader)
-
 	return img
 }
 
-// Will write out a given image to a given path in filename
+// will write out a given image to a given path in filename
 func encodePNG(filename string, img image.Image) {
 	fo, err := os.Create(filename)
 
@@ -267,7 +273,7 @@ func encodePNG(filename string, img image.Image) {
 	err = png.Encode(writer, img)
 }
 
-// Given an image will find how many bytes can be stored in that image using least significant bit encoding
+// given an image will find how many bytes can be stored in that image using least significant bit encoding
 func maxEncodeSize(img image.Image) int {
 
 	width := img.Bounds().Dx()
@@ -276,7 +282,7 @@ func maxEncodeSize(img image.Image) int {
 	return int(((width * height * 3) / 8))
 }
 
-// Given a byte, will return the least significant bit of that byte
+// given a byte, will return the least significant bit of that byte
 func getLSB(b byte) byte {
 	if b%2 == 0 {
 		return 0
@@ -287,7 +293,7 @@ func getLSB(b byte) byte {
 	return b
 }
 
-// Given a byte will set that byte's least significant bit to a given value (where true is 1 and false is 0)
+// given a byte will set that byte's least significant bit to a given value (where true is 1 and false is 0)
 func setLSB(b *byte, bit byte) {
 	if bit == 1 {
 		*b = *b | 1
@@ -297,7 +303,7 @@ func setLSB(b *byte, bit byte) {
 	}
 }
 
-// Given a bit will return a bit from that byte
+// given a bit will return a bit from that byte
 func getBitFromByte(b byte, indexInByte int) byte {
 	b = b << uint(indexInByte)
 	var mask byte = 0x80
@@ -310,8 +316,8 @@ func getBitFromByte(b byte, indexInByte int) byte {
 	return 0
 }
 
+// sets a specific bit in a byte to a given value and returns the new byte
 func setBitInByte(b byte, indexInByte int, bit byte) byte {
-
 	var mask byte = 0x80
 	mask = mask >> uint(indexInByte)
 
@@ -327,6 +333,7 @@ func setBitInByte(b byte, indexInByte int, bit byte) byte {
 var offsetInBytes int = 0
 var offsetInBitsIntoByte int = 0
 
+// each call will return the next subsequent bit in the string
 func getNextBitFromString(s string) (byte, error) {
 
 	lenOfString := len(s)
