@@ -24,18 +24,22 @@ var read bool
 var write bool
 var help bool
 
+var ascii bool
+
 func init() {
 
 	flag.BoolVar(&read, "r", false, "Specifies if you would like to read a message from a given PNG file")
 	flag.BoolVar(&write, "w", false, "Specifies if you would like to write a message to a given PNG file")
 
-	flag.StringVar(&pictureInputFile, "pici", "input.png", "Path to the the input image")
-	flag.StringVar(&pictureOutputFile, "pico", "output.png", "Path to the the output image")
+	flag.StringVar(&pictureInputFile, "imgi", "input.png", "Path to the the input image")
+	flag.StringVar(&pictureOutputFile, "imgo", "output.png", "Path to the the output image")
 
 	flag.StringVar(&messageInputFile, "msgi", "message.txt", "Path to the message input file")
 	flag.StringVar(&messageOutputFile, "msgo", "", "Path to the message output file")
 
 	flag.BoolVar(&help, "help", false, "Help")
+
+	flag.BoolVar(&ascii, "ascii", true, "For use in read mode. Specifies if the anticipated message is in textual form.")
 
 	flag.Parse()
 }
@@ -47,10 +51,10 @@ func main() {
 			fmt.Println("go-steg has two modes: write and read:")
 
 			fmt.Println("- Write: take a message and write it into a specified location")
-			fmt.Println("\t+ EX: ./steg -w -msgi message.txt -pici output.png")
+			fmt.Println("\t+ EX: ./steg -w -msgi message.txt -imgi output.png")
 
 			fmt.Println("- Read: take a picture and read the message from it")
-			fmt.Println("\t+ EX: ./steg -r -pici input.png -msgo out.txt")
+			fmt.Println("\t+ EX: ./steg -r -imgi input.png -msgo out.txt")
 		} else if !read || !write {
 			fmt.Println("You must specify either the read or write flag. See -help for more information\n")
 		}
@@ -69,7 +73,20 @@ func main() {
 	if read {
 		msg := decodeMessageFromPicture()
 
+		// If the message is textual in nature eliminate excess non-ascii characters from the message
+		if ascii == true {
+			var lastIndexOfImg int = len(msg)
+			for i := 0; i < lastIndexOfImg; i++ {
+				if msg[i] < 32 || 127 < msg[i] {
+					lastIndexOfImg = i
+					break
+				}
+			}
+			msg = msg[:lastIndexOfImg]
+		}
+
 		if messageOutputFile != "" {
+
 			err := ioutil.WriteFile(messageOutputFile, msg, 0644)
 
 			if err != nil {
@@ -91,7 +108,7 @@ func decodeMessageFromPicture() (message []byte) {
 	var byteIndex int = 0
 	var bitIndex int = 0
 
-	rgbIm := imageToRGBA(decodeImage(pictureOutputFile))
+	rgbIm := imageToRGBA(decodeImage(pictureInputFile))
 
 	width := rgbIm.Bounds().Dx()
 	height := rgbIm.Bounds().Dy()
@@ -228,7 +245,6 @@ func decodeImage(filename string) image.Image {
 
 	img, _, err := image.Decode(reader)
 
-	fmt.Println("Read", filename)
 	return img
 }
 
