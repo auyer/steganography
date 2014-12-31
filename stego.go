@@ -39,7 +39,7 @@ func init() {
 
 	flag.BoolVar(&help, "help", false, "Help")
 
-	flag.BoolVar(&ascii, "ascii", true, "For use in read mode. Specifies if the anticipated message is in textual form.")
+	flag.BoolVar(&ascii, "ascii", false, "For use in read mode. Specifies if the anticipated message is in textual form.")
 
 	flag.Parse()
 }
