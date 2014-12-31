@@ -5,13 +5,13 @@ Stego is a command line utility written in go to allow simple LSB steganography 
 
 
 
-Write:
+Write
 ------
 Write mode is used to take a message and embed it into an image file using LSB steganography in order to produce a secret image file that will contain your message.
 ```bash
 ./stego -w -msgi message.txt -imgi plain.png -imgo secret.png
 ```
-Read:
+Read
 -----
 Read mode is used to read an image that has been encoded using LSB steganography, and extract the hidden message from that image.
 ```bash
