@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"errors"
+	"flag"
 	"fmt"
 	"image"
 	"image/color"
@@ -19,27 +20,64 @@ var pictureOutputFile string
 var messageInputFile string
 var messageOutputFile string
 
+var read bool
+var write bool
+var help bool
+
+func init() {
+
+	flag.BoolVar(&read, "r", false, "Specifies if you would like to read a message from a given PNG file")
+	flag.BoolVar(&write, "w", false, "Specifies if you would like to write a message to a given PNG file")
+
+	flag.StringVar(&pictureInputFile, "pici", "input.png", "Path to the the input image")
+	flag.StringVar(&pictureOutputFile, "pico", "output.png", "Path to the the output image")
+
+	flag.StringVar(&messageInputFile, "msgi", "message.txt", "Path to the message input file")
+	flag.StringVar(&messageOutputFile, "msgo", "", "Path to the message output file")
+
+	flag.BoolVar(&help, "help", false, "Help")
+
+	flag.Parse()
+}
+
 func main() {
 
-	pictureInputFile = "input.png"
-	pictureOutputFile = "output.png"
-	messageInputFile = "message.txt"
-	messageOutputFile = "out.txt"
+	if (!read && !write) || help {
+		if help {
+			fmt.Println("go-steg has two modes: write and read:")
 
-	message, err := ioutil.ReadFile(messageInputFile)
+			fmt.Println("- Write: take a message and write it into a specified location")
+			fmt.Println("\t+ EX: ./steg -w -msgi message.txt -pici output.png")
 
-	if err != nil {
-		print("Error reading from file!!!")
+			fmt.Println("- Read: take a picture and read the message from it")
+			fmt.Println("\t+ EX: ./steg -r -pici input.png -msgo out.txt")
+		} else if !read || !write {
+			fmt.Println("You must specify either the read or write flag. See -help for more information\n")
+		}
 		return
 	}
 
-	fmt.Println("LENGTH", len(message))
+	if write {
+		message, err := ioutil.ReadFile(messageInputFile)
+		if err != nil {
+			print("Error reading from file!!!")
+			return
+		}
+		encodeString(string(message))
+	}
 
-	encodeString(string(message))
+	if read {
+		msg := decodeMessageFromPicture()
 
-	msg := decodeMessageFromPicture()
+		if messageOutputFile != "" {
+			err := ioutil.WriteFile(messageOutputFile, msg, 0644)
+		} else {
+			for i := range msg {
+				fmt.Printf("%c", msg[i])
+			}
+		}
 
-	err = ioutil.WriteFile(messageOutputFile, msg, 0644)
+	}
 
 }
 
