@@ -71,6 +71,11 @@ func main() {
 
 		if messageOutputFile != "" {
 			err := ioutil.WriteFile(messageOutputFile, msg, 0644)
+
+			if err != nil {
+				fmt.Println("There was an error writing to file: ", messageOutputFile)
+			}
+
 		} else {
 			for i := range msg {
 				fmt.Printf("%c", msg[i])
