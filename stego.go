@@ -103,7 +103,7 @@ func main() {
 
 	if read {
 
-		if messageInputFile == "" || pictureInputFile == "" || pictureOutputFile == "" {
+		if pictureInputFile == "" {
 			fmt.Println("Error: In order to run stego in read mode, you must specify: ")
 			fmt.Println("-imgi: the image with the embeded message")
 			return
@@ -111,7 +111,9 @@ func main() {
 
 		sizeOfMessage := getSizeOfMessageFromImage()
 
-		msg := decodeMessageFromPicture(4, sizeOfMessage) // Read the message from the picture file
+		fmt.Println("The image contains a message of length", sizeOfMessage)
+
+		msg := decodeMessageFromPicture(4, 4+(sizeOfMessage-1)) // Read the message from the picture file
 
 		// if the user specifies a location to write the message to...
 		if messageOutputFile != "" {
