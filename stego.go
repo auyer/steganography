@@ -89,8 +89,6 @@ func main() {
 
 		sizeOfMessage := getSizeOfMessageFromImage()
 
-		fmt.Println("The size of the message is %d", sizeOfMessage)
-
 		msg := decodeMessageFromPicture(4, sizeOfMessage) // Read the message from the picture file
 
 		// if the user specifies a location to write the message to...
@@ -205,8 +203,6 @@ func encodeString(message string) {
 
 	one, two, three, four := splitToBytes(messageLength)
 
-	fmt.Printf("%d = %d %d %d %d\n", messageLength, one, two, three, four)
-
 	message = string(one) + string(two) + string(three) + string(four) + message
 
 	for x := 0; x < width; x++ {
@@ -300,7 +296,7 @@ func encodePNG(filename string, img image.Image) {
 func maxEncodeSize(img image.Image) uint32 {
 	width := img.Bounds().Dx()
 	height := img.Bounds().Dy()
-	return uint32(((width * height * 3) / 8))
+	return uint32(((width * height * 3) / 8)) - 4
 }
 
 // given a byte, will return the least significant bit of that byte
@@ -375,6 +371,7 @@ func getNextBitFromString(s string) (byte, error) {
 	return choiceBit, nil
 }
 
+// gets the size of the message from the first four bytes encoded in the image
 func getSizeOfMessageFromImage() (size uint32) {
 
 	sizeAsByteArray := decodeMessageFromPicture(0, 4)
@@ -401,6 +398,6 @@ func splitToBytes(x uint32) (one, two, three, four byte) {
 
 	two = byte((x >> 16) & mask)
 	three = byte((x >> 8) & mask)
-	four = byte(x | mask)
+	four = byte(x & mask)
 	return
 }
