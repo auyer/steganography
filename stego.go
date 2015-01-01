@@ -1,5 +1,11 @@
 package main
 
+/*
+TODO:
+- Add documentation for length flag.
+- Ensure that picture is getting encoded correctly at head of image. Length might need to be int32 or int64
+*/
+
 import (
 	"bufio"
 	"errors"
@@ -20,6 +26,8 @@ var pictureOutputFile string
 var messageInputFile string
 var messageOutputFile string
 
+var printLen bool
+
 var read bool
 var write bool
 var help bool
@@ -28,6 +36,7 @@ func init() {
 
 	flag.BoolVar(&read, "r", false, "Specifies if you would like to read a message from a given PNG file")
 	flag.BoolVar(&write, "w", false, "Specifies if you would like to write a message to a given PNG file")
+	flag.BoolVar(&printLen, "length", false, "When set, will print out the max message size that can fit into given image.")
 
 	flag.StringVar(&pictureInputFile, "imgi", "input.png", "Path to the the input image")
 	flag.StringVar(&pictureOutputFile, "imgo", "output.png", "Path to the the output image")
@@ -42,7 +51,7 @@ func init() {
 
 func main() {
 
-	if (!read && !write) || help {
+	if (!read && !write && !printLen) || help {
 		if help {
 			fmt.Println("go-steg has two modes: write and read:")
 
@@ -55,6 +64,16 @@ func main() {
 			fmt.Println("You must specify either the read or write flag. See -help for more information\n")
 		}
 		return
+	}
+
+	if printLen {
+		rgbIm := imageToRGBA(decodeImage(pictureInputFile))
+
+		var sizeInBytes int = maxEncodeSize(rgbIm)
+
+		fmt.Println("B: ", sizeInBytes)
+		fmt.Println("KB: ", float64(sizeInBytes)/1000)
+		fmt.Println("MB: ", (float64(sizeInBytes)/1000)/1000)
 	}
 
 	if write {
