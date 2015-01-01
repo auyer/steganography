@@ -38,10 +38,10 @@ func init() {
 	flag.BoolVar(&write, "w", false, "Specifies if you would like to write a message to a given PNG file")
 	flag.BoolVar(&printLen, "length", false, "When set, will print out the max message size that can fit into given image.")
 
-	flag.StringVar(&pictureInputFile, "imgi", "input.png", "Path to the the input image")
-	flag.StringVar(&pictureOutputFile, "imgo", "output.png", "Path to the the output image")
+	flag.StringVar(&pictureInputFile, "imgi", "", "Path to the the input image")
+	flag.StringVar(&pictureOutputFile, "imgo", "", "Path to the the output image")
 
-	flag.StringVar(&messageInputFile, "msgi", "message.txt", "Path to the message input file")
+	flag.StringVar(&messageInputFile, "msgi", "", "Path to the message input file")
 	flag.StringVar(&messageOutputFile, "msgo", "", "Path to the message output file")
 
 	flag.BoolVar(&help, "help", false, "Help")
@@ -61,22 +61,38 @@ func main() {
 			fmt.Println("- Read: take a picture and read the message from it")
 			fmt.Println("\t+ EX: ./stego -r -imgi secret.png -msgo secret.txt")
 		} else if !read || !write {
-			fmt.Println("You must specify either the read or write flag. See -help for more information\n")
+			fmt.Println("You must specify either the read, write, or length flag. See -help for more information\n")
 		}
 		return
 	}
 
 	if printLen {
+
+		if pictureInputFile == "" {
+			fmt.Println("Error: In order to run stego in length mode, you must specify: ")
+			fmt.Println("-imgi: the image that you would like to check the maximum encoding length of")
+			return
+		}
+
 		rgbIm := imageToRGBA(decodeImage(pictureInputFile))
 
 		var sizeInBytes uint32 = maxEncodeSize(rgbIm)
 
-		fmt.Println("B: ", sizeInBytes)
-		fmt.Println("KB: ", float64(sizeInBytes)/1000)
-		fmt.Println("MB: ", (float64(sizeInBytes)/1000)/1000)
+		fmt.Println("B:\t", sizeInBytes)
+		fmt.Println("KB:\t", float64(sizeInBytes)/1000)
+		fmt.Println("MB:\t", (float64(sizeInBytes)/1000)/1000)
 	}
 
 	if write {
+
+		if messageInputFile == "" || pictureInputFile == "" || pictureOutputFile == "" {
+			fmt.Println("Error: In order to run stego in write mode, you must specify: ")
+			fmt.Println("-imgi: the plain image that you would like to encode with")
+			fmt.Println("-imgo: where you would like to store the encoded image")
+			fmt.Println("-msgi: the message that you would like to embed in the image")
+			return
+		}
+
 		message, err := ioutil.ReadFile(messageInputFile) // Read the message from the message file
 		if err != nil {
 			print("Error reading from file!!!")
@@ -86,6 +102,12 @@ func main() {
 	}
 
 	if read {
+
+		if messageInputFile == "" || pictureInputFile == "" || pictureOutputFile == "" {
+			fmt.Println("Error: In order to run stego in read mode, you must specify: ")
+			fmt.Println("-imgi: the image with the embeded message")
+			return
+		}
 
 		sizeOfMessage := getSizeOfMessageFromImage()
 
