@@ -31,4 +31,5 @@ Read mode is used to read an image that has been encoded using LSB steganography
 If no 'msgo' is specified, the message will be printed to stdout:
 ```bash
 › ./stego -r -imgi secret.png
+Hello World!
 ```
