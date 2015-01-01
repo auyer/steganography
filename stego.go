@@ -111,9 +111,7 @@ func main() {
 
 		sizeOfMessage := getSizeOfMessageFromImage()
 
-		fmt.Println("The image contains a message of length", sizeOfMessage)
-
-		msg := decodeMessageFromPicture(4, 4+(sizeOfMessage-1)) // Read the message from the picture file
+		msg := decodeMessageFromPicture(4, 4+sizeOfMessage) // Read the message from the picture file
 
 		// if the user specifies a location to write the message to...
 		if messageOutputFile != "" {
@@ -162,7 +160,7 @@ func decodeMessageFromPicture(startOffset uint32, msgLen uint32) (message []byte
 				bitIndex = 0
 				byteIndex++
 
-				if (byteIndex > msgLen) && msgLen != 0 {
+				if byteIndex >= msgLen {
 					return message[startOffset:]
 				}
 
@@ -179,7 +177,7 @@ func decodeMessageFromPicture(startOffset uint32, msgLen uint32) (message []byte
 				bitIndex = 0
 				byteIndex++
 
-				if (byteIndex > msgLen) && msgLen != 0 {
+				if byteIndex >= msgLen {
 					return message[startOffset:]
 				}
 
@@ -195,7 +193,7 @@ func decodeMessageFromPicture(startOffset uint32, msgLen uint32) (message []byte
 				bitIndex = 0
 				byteIndex++
 
-				if (byteIndex > msgLen) && msgLen != 0 {
+				if byteIndex >= msgLen {
 					return message[startOffset:]
 				}
 
