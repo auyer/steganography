@@ -1,11 +1,5 @@
 package main
 
-/*
-TODO:
-- Add documentation for length flag.
-- Ensure that picture is getting encoded correctly at head of image. Length might need to be int32 or int64
-*/
-
 import (
 	"bufio"
 	"errors"
@@ -129,6 +123,70 @@ func main() {
 	}
 }
 
+// encodes a given string into the input image using least significant bit encryption
+func encodeString(message string) {
+
+	rgbIm := imageToRGBA(decodeImage(pictureInputFile))
+
+	var messageLength uint32 = uint32(utf8.RuneCountInString(message))
+	var width int = rgbIm.Bounds().Dx()
+	var height int = rgbIm.Bounds().Dy()
+
+	if maxEncodeSize(rgbIm) < messageLength+4 {
+		print("Error! The message you are trying to encode is too large.")
+		return
+	}
+
+	var c color.RGBA
+	var offsetIntoMessage int = 0
+	var bit byte
+	var err error
+
+	one, two, three, four := splitToBytes(messageLength)
+
+	message = string(one) + string(two) + string(three) + string(four) + message
+
+	for x := 0; x < width; x++ {
+		for y := 0; y < height; y++ {
+
+			c = rgbIm.RGBAAt(x, y) // get the color at this pixel
+
+			/*  RED  */
+			bit, err = getNextBitFromString(message)
+			if err != nil { // if we don't have any more bits left in our message
+				rgbIm.SetRGBA(x, y, c)
+				encodePNG(pictureOutputFile, rgbIm) // write the encoded file out
+				return
+			}
+			setLSB(&c.R, bit)
+
+			/*  GREEN  */
+			bit, err = getNextBitFromString(message)
+			if err != nil {
+				rgbIm.SetRGBA(x, y, c)
+				encodePNG(pictureOutputFile, rgbIm)
+				return
+			}
+			setLSB(&c.G, bit)
+
+			/*  BLUE  */
+			bit, err = getNextBitFromString(message)
+			if err != nil {
+				rgbIm.SetRGBA(x, y, c)
+				encodePNG(pictureOutputFile, rgbIm)
+				return
+			}
+			setLSB(&c.B, bit)
+
+			rgbIm.SetRGBA(x, y, c)
+
+			offsetIntoMessage++
+		}
+	}
+
+	encodePNG(pictureOutputFile, rgbIm)
+}
+
 // using LSB steganography, decode the message from the picture and return it as a sequence of bytes
 func decodeMessageFromPicture(startOffset uint32, msgLen uint32) (message []byte) {
 
@@ -204,114 +262,12 @@ func decodeMessageFromPicture(startOffset uint32, msgLen uint32) (message []byte
 	return
 }
 
-// encodes a given string into the input image using least significant bit encryption
-func encodeString(message string) {
+// gets the size of the message from the first four bytes encoded in the image
+func getSizeOfMessageFromImage() (size uint32) {
 
-	rgbIm := imageToRGBA(decodeImage(pictureInputFile))
-
-	var messageLength uint32 = uint32(utf8.RuneCountInString(message))
-	var width int = rgbIm.Bounds().Dx()
-	var height int = rgbIm.Bounds().Dy()
-
-	if maxEncodeSize(rgbIm) < messageLength+4 {
-		print("Error! The message you are trying to encode is too large.")
-		return
-	}
-
-	var c color.RGBA
-	var offsetIntoMessage int = 0
-	var bit byte
-	var err error
-
-	one, two, three, four := splitToBytes(messageLength)
-
-	message = string(one) + string(two) + string(three) + string(four) + message
-
-	for x := 0; x < width; x++ {
-		for y := 0; y < height; y++ {
-
-			c = rgbIm.RGBAAt(x, y) // get the color at this pixel
-
-			/*  RED  */
-			bit, err = getNextBitFromString(message)
-			if err != nil { // if we don't have any more bits left in our message
-				rgbIm.SetRGBA(x, y, c)
-				encodePNG(pictureOutputFile, rgbIm) // write the encoded file out
-				return
-			}
-			setLSB(&c.R, bit)
-
-			/*  GREEN  */
-			bit, err = getNextBitFromString(message)
-			if err != nil {
-				rgbIm.SetRGBA(x, y, c)
-				encodePNG(pictureOutputFile, rgbIm)
-				return
-			}
-			setLSB(&c.G, bit)
-
-			/*  BLUE  */
-			bit, err = getNextBitFromString(message)
-			if err != nil {
-				rgbIm.SetRGBA(x, y, c)
-				encodePNG(pictureOutputFile, rgbIm)
-				return
-			}
-			setLSB(&c.B, bit)
-
-			rgbIm.SetRGBA(x, y, c)
-
-			offsetIntoMessage++
-		}
-	}
-
-	encodePNG(pictureOutputFile, rgbIm)
-}
-
-// convert given image to RGBA image
-func imageToRGBA(src image.Image) *image.RGBA {
-	b := src.Bounds()
-
-	var m *image.RGBA
-	var width, height int
-
-	width = b.Dx()
-	height = b.Dy()
-
-	m = image.NewRGBA(image.Rect(0, 0, width, height))
-	draw.Draw(m, m.Bounds(), src, b.Min, draw.Src)
-	return m
-}
-
-// read and return an image at the given path
-func decodeImage(filename string) image.Image {
-	inFile, err := os.Open(filename)
-
-	if err != nil {
-		log.Fatalf("Error opening file %s: %v", filename, err)
-	}
-
-	defer inFile.Close()
-	reader := bufio.NewReader(inFile)
-	img, _, err := image.Decode(reader)
-	return img
-}
-
-// will write out a given image to a given path in filename
-func encodePNG(filename string, img image.Image) {
-	fo, err := os.Create(filename)
-
-	if err != nil {
-		log.Fatalf("Error creating file %s: %v", filename, err)
-	}
-
-	defer fo.Close()
-	defer fo.Sync()
-
-	writer := bufio.NewWriter(fo)
-	defer writer.Flush()
-
-	err = png.Encode(writer, img)
+	sizeAsByteArray := decodeMessageFromPicture(0, 4)
+	size = combineToInt(sizeAsByteArray[0], sizeAsByteArray[1], sizeAsByteArray[2], sizeAsByteArray[3])
+	return
 }
 
 // given an image will find how many bytes can be stored in that image using least significant bit encoding
@@ -393,14 +349,6 @@ func getNextBitFromString(s string) (byte, error) {
 	return choiceBit, nil
 }
 
-// gets the size of the message from the first four bytes encoded in the image
-func getSizeOfMessageFromImage() (size uint32) {
-
-	sizeAsByteArray := decodeMessageFromPicture(0, 4)
-	size = combineToInt(sizeAsByteArray[0], sizeAsByteArray[1], sizeAsByteArray[2], sizeAsByteArray[3])
-	return
-}
-
 // given four bytes, will return the 32 bit unsigned integer which is the composition of those four bytes (one is MSB)
 func combineToInt(one, two, three, four byte) (ret uint32) {
 	ret = uint32(one)
@@ -422,4 +370,50 @@ func splitToBytes(x uint32) (one, two, three, four byte) {
 	three = byte((x >> 8) & mask)
 	four = byte(x & mask)
 	return
+}
+
+// read and return an image at the given path
+func decodeImage(filename string) image.Image {
+	inFile, err := os.Open(filename)
+
+	if err != nil {
+		log.Fatalf("Error opening file %s: %v", filename, err)
+	}
+
+	defer inFile.Close()
+	reader := bufio.NewReader(inFile)
+	img, _, err := image.Decode(reader)
+	return img
+}
+
+// will write out a given image to a given path in filename
+func encodePNG(filename string, img image.Image) {
+	fo, err := os.Create(filename)
+
+	if err != nil {
+		log.Fatalf("Error creating file %s: %v", filename, err)
+	}
+
+	defer fo.Close()
+	defer fo.Sync()
+
+	writer := bufio.NewWriter(fo)
+	defer writer.Flush()
+
+	err = png.Encode(writer, img)
+}
+
+// convert given image to RGBA image
+func imageToRGBA(src image.Image) *image.RGBA {
+	b := src.Bounds()
+
+	var m *image.RGBA
+	var width, height int
+
+	width = b.Dx()
+	height = b.Dy()
+
+	m = image.NewRGBA(image.Rect(0, 0, width, height))
+	draw.Draw(m, m.Bounds(), src, b.Min, draw.Src)
+	return m
 }
