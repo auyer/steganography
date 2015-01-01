@@ -69,7 +69,7 @@ func main() {
 	if printLen {
 		rgbIm := imageToRGBA(decodeImage(pictureInputFile))
 
-		var sizeInBytes int = maxEncodeSize(rgbIm)
+		var sizeInBytes uint32 = maxEncodeSize(rgbIm)
 
 		fmt.Println("B: ", sizeInBytes)
 		fmt.Println("KB: ", float64(sizeInBytes)/1000)
@@ -86,7 +86,12 @@ func main() {
 	}
 
 	if read {
-		msg := decodeMessageFromPicture() // Read the message from the picture file
+
+		sizeOfMessage := getSizeOfMessageFromImage()
+
+		fmt.Println("The size of the message is %d", sizeOfMessage)
+
+		msg := decodeMessageFromPicture(4, sizeOfMessage) // Read the message from the picture file
 
 		// if the user specifies a location to write the message to...
 		if messageOutputFile != "" {
@@ -105,10 +110,10 @@ func main() {
 }
 
 // using LSB steganography, decode the message from the picture and return it as a sequence of bytes
-func decodeMessageFromPicture() (message []byte) {
+func decodeMessageFromPicture(startOffset uint32, msgLen uint32) (message []byte) {
 
-	var byteIndex int = 0
-	var bitIndex int = 0
+	var byteIndex uint32 = 0
+	var bitIndex uint32 = 0
 
 	rgbIm := imageToRGBA(decodeImage(pictureInputFile))
 
@@ -117,8 +122,6 @@ func decodeMessageFromPicture() (message []byte) {
 
 	var c color.RGBA
 	var lsb byte
-
-	var msgLen int = 0
 
 	message = append(message, 0)
 
@@ -138,7 +141,7 @@ func decodeMessageFromPicture() (message []byte) {
 				byteIndex++
 
 				if (byteIndex > msgLen) && msgLen != 0 {
-					return message[1:]
+					return message[startOffset:]
 				}
 
 				message = append(message, 0)
@@ -151,15 +154,11 @@ func decodeMessageFromPicture() (message []byte) {
 
 			if bitIndex > 7 {
 
-				if msgLen == 0 {
-					msgLen = int(message[0])
-				}
-
 				bitIndex = 0
 				byteIndex++
 
 				if (byteIndex > msgLen) && msgLen != 0 {
-					return message[1:]
+					return message[startOffset:]
 				}
 
 				message = append(message, 0)
@@ -175,7 +174,7 @@ func decodeMessageFromPicture() (message []byte) {
 				byteIndex++
 
 				if (byteIndex > msgLen) && msgLen != 0 {
-					return message[1:]
+					return message[startOffset:]
 				}
 
 				message = append(message, 0)
@@ -190,11 +189,11 @@ func encodeString(message string) {
 
 	rgbIm := imageToRGBA(decodeImage(pictureInputFile))
 
-	var messageLength int = utf8.RuneCountInString(message)
+	var messageLength uint32 = uint32(utf8.RuneCountInString(message))
 	var width int = rgbIm.Bounds().Dx()
 	var height int = rgbIm.Bounds().Dy()
 
-	if maxEncodeSize(rgbIm) < messageLength+1 {
+	if maxEncodeSize(rgbIm) < messageLength+4 {
 		print("Error! The message you are trying to encode is too large.")
 		return
 	}
@@ -204,7 +203,11 @@ func encodeString(message string) {
 	var bit byte
 	var err error
 
-	message = string(len(message)) + message
+	one, two, three, four := splitToBytes(messageLength)
+
+	fmt.Printf("%d = %d %d %d %d\n", messageLength, one, two, three, four)
+
+	message = string(one) + string(two) + string(three) + string(four) + message
 
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
@@ -294,10 +297,10 @@ func encodePNG(filename string, img image.Image) {
 }
 
 // given an image will find how many bytes can be stored in that image using least significant bit encoding
-func maxEncodeSize(img image.Image) int {
+func maxEncodeSize(img image.Image) uint32 {
 	width := img.Bounds().Dx()
 	height := img.Bounds().Dy()
-	return int(((width * height * 3) / 8))
+	return uint32(((width * height * 3) / 8))
 }
 
 // given a byte, will return the least significant bit of that byte
@@ -334,7 +337,7 @@ func getBitFromByte(b byte, indexInByte int) byte {
 }
 
 // sets a specific bit in a byte to a given value and returns the new byte
-func setBitInByte(b byte, indexInByte int, bit byte) byte {
+func setBitInByte(b byte, indexInByte uint32, bit byte) byte {
 	var mask byte = 0x80
 	mask = mask >> uint(indexInByte)
 
@@ -370,4 +373,34 @@ func getNextBitFromString(s string) (byte, error) {
 		offsetInBytes++
 	}
 	return choiceBit, nil
+}
+
+func getSizeOfMessageFromImage() (size uint32) {
+
+	sizeAsByteArray := decodeMessageFromPicture(0, 4)
+	size = combineToInt(sizeAsByteArray[0], sizeAsByteArray[1], sizeAsByteArray[2], sizeAsByteArray[3])
+	return
+}
+
+// given four bytes, will return the 32 bit unsigned integer which is the composition of those four bytes (one is MSB)
+func combineToInt(one, two, three, four byte) (ret uint32) {
+	ret = uint32(one)
+	ret = ret << 8
+	ret = ret | uint32(two)
+	ret = ret << 8
+	ret = ret | uint32(three)
+	ret = ret << 8
+	ret = ret | uint32(four)
+	return
+}
+
+// given an unsigned integer, will split this integer into its four bytes
+func splitToBytes(x uint32) (one, two, three, four byte) {
+	one = byte(x >> 24)
+	var mask uint32 = 255
+
+	two = byte((x >> 16) & mask)
+	three = byte((x >> 8) & mask)
+	four = byte(x | mask)
+	return
 }
