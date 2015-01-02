@@ -128,7 +128,6 @@ func encodeString(message []byte) {
 	var width int = rgbIm.Bounds().Dx()
 	var height int = rgbIm.Bounds().Dy()
 	var c color.RGBA
-	var offsetIntoMessage int = 0
 	var bit byte
 	var ok bool
 
@@ -181,8 +180,6 @@ func encodeString(message []byte) {
 			setLSB(&c.B, bit)
 
 			rgbIm.SetRGBA(x, y, c)
-
-			offsetIntoMessage++
 		}
 	}
 
