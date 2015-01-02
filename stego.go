@@ -17,9 +17,7 @@ var pictureInputFile string
 var pictureOutputFile string
 var messageInputFile string
 var messageOutputFile string
-
 var printLen bool
-
 var read bool
 var write bool
 var help bool
@@ -42,7 +40,6 @@ func init() {
 }
 
 func main() {
-
 	if (!read && !write && !printLen) || help {
 		if help {
 			fmt.Println("go-steg has two modes: write and read:")
@@ -108,8 +105,7 @@ func main() {
 
 		// if the user specifies a location to write the message to...
 		if messageOutputFile != "" {
-			// write the message to the given output file
-			err := ioutil.WriteFile(messageOutputFile, msg, 0644)
+			err := ioutil.WriteFile(messageOutputFile, msg, 0644) // write the message to the given output file
 
 			if err != nil {
 				fmt.Println("There was an error writing to file: ", messageOutputFile)
@@ -148,7 +144,7 @@ func encodeString(message []byte) {
 	message = append([]byte{two}, message...)
 	message = append([]byte{one}, message...)
 
-	ch := make(chan byte)
+	ch := make(chan byte, 100)
 
 	go getNextBitFromString(message, ch)
 
