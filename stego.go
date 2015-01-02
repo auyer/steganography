@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"errors"
 	"flag"
 	"fmt"
 	"image"
@@ -12,7 +11,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"unicode/utf8"
 )
 
 var pictureInputFile string
@@ -92,6 +90,7 @@ func main() {
 			print("Error reading from file!!!")
 			return
 		}
+
 		encodeString(string(message)) // Encode the message into the image file
 	}
 
@@ -105,7 +104,9 @@ func main() {
 
 		sizeOfMessage := getSizeOfMessageFromImage()
 
-		msg := decodeMessageFromPicture(4, 4+sizeOfMessage) // Read the message from the picture file
+		fmt.Println("Size of message is ", sizeOfMessage)
+
+		msg := decodeMessageFromPicture(4, sizeOfMessage) // Read the message from the picture file
 
 		// if the user specifies a location to write the message to...
 		if messageOutputFile != "" {
@@ -128,23 +129,34 @@ func encodeString(message string) {
 
 	rgbIm := imageToRGBA(decodeImage(pictureInputFile))
 
-	var messageLength uint32 = uint32(utf8.RuneCountInString(message))
+	var messageLength uint32 = uint32(len(message))
+
+	fmt.Println("The size of message is ", len(message), " ", messageLength)
+
 	var width int = rgbIm.Bounds().Dx()
 	var height int = rgbIm.Bounds().Dy()
+	var c color.RGBA
+	var offsetIntoMessage int = 0
+	var bit byte
+	var ok bool
 
 	if maxEncodeSize(rgbIm) < messageLength+4 {
 		print("Error! The message you are trying to encode is too large.")
 		return
 	}
 
-	var c color.RGBA
-	var offsetIntoMessage int = 0
-	var bit byte
-	var err error
-
 	one, two, three, four := splitToBytes(messageLength)
 
+	fmt.Printf("%d %d %d %d = %d\n", one, two, three, four, messageLength)
+
 	message = string(one) + string(two) + string(three) + string(four) + message
+
+	fmt.Printf("'%s' '%s' '%s' '%s'\n", string(one), string(two), string(three), string(four))
+	fmt.Printf("%d %d %d %d\n", uint32(message[0]), uint32(message[0]), uint32(message[0]), uint32(message[0]))
+
+	ch := make(chan byte)
+
+	go getNextBitFromString(message, ch)
 
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
@@ -152,8 +164,8 @@ func encodeString(message string) {
 			c = rgbIm.RGBAAt(x, y) // get the color at this pixel
 
 			/*  RED  */
-			bit, err = getNextBitFromString(message)
-			if err != nil { // if we don't have any more bits left in our message
+			bit, ok = <-ch
+			if !ok { // if we don't have any more bits left in our message
 				rgbIm.SetRGBA(x, y, c)
 				encodePNG(pictureOutputFile, rgbIm) // write the encoded file out
 				return
@@ -161,8 +173,8 @@ func encodeString(message string) {
 			setLSB(&c.R, bit)
 
 			/*  GREEN  */
-			bit, err = getNextBitFromString(message)
-			if err != nil {
+			bit, ok = <-ch
+			if !ok {
 				rgbIm.SetRGBA(x, y, c)
 				encodePNG(pictureOutputFile, rgbIm)
 				return
@@ -170,8 +182,8 @@ func encodeString(message string) {
 			setLSB(&c.G, bit)
 
 			/*  BLUE  */
-			bit, err = getNextBitFromString(message)
-			if err != nil {
+			bit, ok = <-ch
+			if !ok {
 				rgbIm.SetRGBA(x, y, c)
 				encodePNG(pictureOutputFile, rgbIm)
 				return
@@ -218,8 +230,10 @@ func decodeMessageFromPicture(startOffset uint32, msgLen uint32) (message []byte
 				bitIndex = 0
 				byteIndex++
 
-				if byteIndex >= msgLen {
-					return message[startOffset:]
+				if byteIndex >= msgLen+startOffset {
+					fmt.Printf("%d >= %d\n", byteIndex, msgLen+startOffset)
+					fmt.Printf("Start offset is %d and the length is %d\n", startOffset, msgLen)
+					return message[startOffset : msgLen+startOffset]
 				}
 
 				message = append(message, 0)
@@ -235,8 +249,10 @@ func decodeMessageFromPicture(startOffset uint32, msgLen uint32) (message []byte
 				bitIndex = 0
 				byteIndex++
 
-				if byteIndex >= msgLen {
-					return message[startOffset:]
+				if byteIndex >= msgLen+startOffset {
+					fmt.Printf("%d >= %d\n", byteIndex, msgLen+startOffset)
+					fmt.Printf("Start offset is %d and the length is %d\n", startOffset, msgLen)
+					return message[startOffset : msgLen+startOffset]
 				}
 
 				message = append(message, 0)
@@ -251,8 +267,11 @@ func decodeMessageFromPicture(startOffset uint32, msgLen uint32) (message []byte
 				bitIndex = 0
 				byteIndex++
 
-				if byteIndex >= msgLen {
-					return message[startOffset:]
+				if byteIndex >= msgLen+startOffset {
+
+					fmt.Printf("%d >= %d\n", byteIndex, msgLen+startOffset)
+					fmt.Printf("Start offset is %d and the length is %d\n", startOffset, msgLen)
+					return message[startOffset : msgLen+startOffset]
 				}
 
 				message = append(message, 0)
@@ -267,6 +286,9 @@ func getSizeOfMessageFromImage() (size uint32) {
 
 	sizeAsByteArray := decodeMessageFromPicture(0, 4)
 	size = combineToInt(sizeAsByteArray[0], sizeAsByteArray[1], sizeAsByteArray[2], sizeAsByteArray[3])
+
+	fmt.Printf("%d %d %d %d = %d\n", sizeAsByteArray[0], sizeAsByteArray[1], sizeAsByteArray[2], sizeAsByteArray[3], size)
+
 	return
 }
 
@@ -275,6 +297,34 @@ func maxEncodeSize(img image.Image) uint32 {
 	width := img.Bounds().Dx()
 	height := img.Bounds().Dy()
 	return uint32(((width * height * 3) / 8)) - 4
+}
+
+// each call will return the next subsequent bit in the string
+func getNextBitFromString(s string, ch chan byte) {
+
+	var offsetInBytes int = 0
+	var offsetInBitsIntoByte int = 0
+	var byteArray []byte = []byte(s)
+	var choiceByte byte
+
+	lenOfString := len(s)
+
+	for {
+		if offsetInBytes >= lenOfString {
+			close(ch)
+			return
+		}
+
+		choiceByte = byteArray[offsetInBytes]
+		ch <- getBitFromByte(choiceByte, offsetInBitsIntoByte)
+
+		offsetInBitsIntoByte++
+
+		if offsetInBitsIntoByte >= 8 {
+			offsetInBitsIntoByte = 0
+			offsetInBytes++
+		}
+	}
 }
 
 // given a byte, will return the least significant bit of that byte
@@ -322,31 +372,6 @@ func setBitInByte(b byte, indexInByte uint32, bit byte) byte {
 		b = b | mask
 	}
 	return b
-}
-
-var offsetInBytes int = 0
-var offsetInBitsIntoByte int = 0
-
-// each call will return the next subsequent bit in the string
-func getNextBitFromString(s string) (byte, error) {
-
-	lenOfString := len(s)
-
-	if offsetInBytes >= lenOfString {
-		return 0, errors.New("Error! Can't offset that far into the string.")
-	}
-
-	byteArray := []byte(s)
-	choiceByte := byteArray[offsetInBytes]
-	choiceBit := getBitFromByte(choiceByte, offsetInBitsIntoByte)
-
-	offsetInBitsIntoByte++
-
-	if offsetInBitsIntoByte >= 8 {
-		offsetInBitsIntoByte = 0
-		offsetInBytes++
-	}
-	return choiceBit, nil
 }
 
 // given four bytes, will return the 32 bit unsigned integer which is the composition of those four bytes (one is MSB)
