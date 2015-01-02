@@ -91,7 +91,7 @@ func main() {
 			return
 		}
 
-		encodeString(string(message)) // Encode the message into the image file
+		encodeString(message) // Encode the message into the image file
 	}
 
 	if read {
@@ -103,8 +103,6 @@ func main() {
 		}
 
 		sizeOfMessage := getSizeOfMessageFromImage()
-
-		fmt.Println("Size of message is ", sizeOfMessage)
 
 		msg := decodeMessageFromPicture(4, sizeOfMessage) // Read the message from the picture file
 
@@ -125,13 +123,11 @@ func main() {
 }
 
 // encodes a given string into the input image using least significant bit encryption
-func encodeString(message string) {
+func encodeString(message []byte) {
 
 	rgbIm := imageToRGBA(decodeImage(pictureInputFile))
 
 	var messageLength uint32 = uint32(len(message))
-
-	fmt.Println("The size of message is ", len(message), " ", messageLength)
 
 	var width int = rgbIm.Bounds().Dx()
 	var height int = rgbIm.Bounds().Dy()
@@ -147,12 +143,10 @@ func encodeString(message string) {
 
 	one, two, three, four := splitToBytes(messageLength)
 
-	fmt.Printf("%d %d %d %d = %d\n", one, two, three, four, messageLength)
-
-	message = string(one) + string(two) + string(three) + string(four) + message
-
-	fmt.Printf("'%s' '%s' '%s' '%s'\n", string(one), string(two), string(three), string(four))
-	fmt.Printf("%d %d %d %d\n", uint32(message[0]), uint32(message[0]), uint32(message[0]), uint32(message[0]))
+	message = append([]byte{four}, message...)
+	message = append([]byte{three}, message...)
+	message = append([]byte{two}, message...)
+	message = append([]byte{one}, message...)
 
 	ch := make(chan byte)
 
@@ -231,8 +225,6 @@ func decodeMessageFromPicture(startOffset uint32, msgLen uint32) (message []byte
 				byteIndex++
 
 				if byteIndex >= msgLen+startOffset {
-					fmt.Printf("%d >= %d\n", byteIndex, msgLen+startOffset)
-					fmt.Printf("Start offset is %d and the length is %d\n", startOffset, msgLen)
 					return message[startOffset : msgLen+startOffset]
 				}
 
@@ -250,8 +242,6 @@ func decodeMessageFromPicture(startOffset uint32, msgLen uint32) (message []byte
 				byteIndex++
 
 				if byteIndex >= msgLen+startOffset {
-					fmt.Printf("%d >= %d\n", byteIndex, msgLen+startOffset)
-					fmt.Printf("Start offset is %d and the length is %d\n", startOffset, msgLen)
 					return message[startOffset : msgLen+startOffset]
 				}
 
@@ -268,9 +258,6 @@ func decodeMessageFromPicture(startOffset uint32, msgLen uint32) (message []byte
 				byteIndex++
 
 				if byteIndex >= msgLen+startOffset {
-
-					fmt.Printf("%d >= %d\n", byteIndex, msgLen+startOffset)
-					fmt.Printf("Start offset is %d and the length is %d\n", startOffset, msgLen)
 					return message[startOffset : msgLen+startOffset]
 				}
 
@@ -286,9 +273,6 @@ func getSizeOfMessageFromImage() (size uint32) {
 
 	sizeAsByteArray := decodeMessageFromPicture(0, 4)
 	size = combineToInt(sizeAsByteArray[0], sizeAsByteArray[1], sizeAsByteArray[2], sizeAsByteArray[3])
-
-	fmt.Printf("%d %d %d %d = %d\n", sizeAsByteArray[0], sizeAsByteArray[1], sizeAsByteArray[2], sizeAsByteArray[3], size)
-
 	return
 }
 
@@ -300,14 +284,13 @@ func maxEncodeSize(img image.Image) uint32 {
 }
 
 // each call will return the next subsequent bit in the string
-func getNextBitFromString(s string, ch chan byte) {
+func getNextBitFromString(byteArray []byte, ch chan byte) {
 
 	var offsetInBytes int = 0
 	var offsetInBitsIntoByte int = 0
-	var byteArray []byte = []byte(s)
 	var choiceByte byte
 
-	lenOfString := len(s)
+	lenOfString := len(byteArray)
 
 	for {
 		if offsetInBytes >= lenOfString {
