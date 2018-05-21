@@ -87,7 +87,7 @@ func main() {
 	if decode {
 
 		if pictureInputFile == "" {
-			fmt.Println("Error: In order to run stego in read mode, you must specify: -im: the image with the embeded message")
+			fmt.Println("Error: In order to run stego in read mode, you must specify: -im: the image with the embedded message")
 			return
 		}
 
@@ -99,6 +99,9 @@ func main() {
 
 		reader := bufio.NewReader(inFile)
 		img, _, err := image.Decode(reader)
+		if err != nil {
+			log.Fatalf("error decoding file", img)
+		}
 
 		sizeOfMessage := steganography.GetSizeOfMessageFromImage(img)
 

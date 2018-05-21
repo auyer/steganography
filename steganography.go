@@ -1,5 +1,4 @@
 // steganography library provides functions to execute steganography encoding and decoding in a given image. It is also able to check the maximum encoding size, and the size of an encoded message.
-
 package steganography
 
 import (
@@ -102,8 +101,8 @@ func EncodeString(message []byte, pictureInputFile image.Image) bytes.Buffer {
 */
 func DecodeMessageFromPicture(startOffset uint32, msgLen uint32, pictureInputFile image.Image) (message []byte) {
 
-	var byteIndex uint32 = 0
-	var bitIndex uint32 = 0
+	var byteIndex uint32
+	var bitIndex uint32
 
 	rgbIm := imageToRGBA(pictureInputFile)
 
@@ -192,8 +191,8 @@ func GetSizeOfMessageFromImage(pictureInputFile image.Image) (size uint32) {
 // getNextBitFromString each call will return the next subsequent bit in the string
 func getNextBitFromString(byteArray []byte, ch chan byte) {
 
-	var offsetInBytes int = 0
-	var offsetInBitsIntoByte int = 0
+	var offsetInBytes int
+	var offsetInBitsIntoByte int
 	var choiceByte byte
 
 	lenOfString := len(byteArray)
@@ -220,9 +219,8 @@ func getNextBitFromString(byteArray []byte, ch chan byte) {
 func getLSB(b byte) byte {
 	if b%2 == 0 {
 		return 0
-	} else {
-		return 1
 	}
+	return 1
 }
 
 // setLSB given a byte will set that byte's least significant bit to a given value (where true is 1 and false is 0)
@@ -296,6 +294,9 @@ func DecodeImage(filename string) image.Image {
 	defer inFile.Close()
 	reader := bufio.NewReader(inFile)
 	img, name, err := image.Decode(reader)
+	if err != nil {
+		log.Fatalf("Error decoding image %s: %v", filename, err)
+	}
 	println(name)
 	return img
 }
