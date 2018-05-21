@@ -37,28 +37,7 @@ func init() {
 }
 
 func main() {
-	if (!decode && !encode) || help {
-		if help {
-
-			fmt.Println("-e: take a message and encodes it into a specified location")
-			fmt.Println("\t+ EX: ./main -e -mi message.txt -i plain.png -o secret.png")
-
-			fmt.Println("-d: take a picture and decodes the message from it")
-			fmt.Println("\t+ EX: ./stego -d -i secret.png -mo secret.txt")
-		} else if !decode || !encode {
-			fmt.Println("You must specify either the decode, write, flag. See -help for more information\n")
-		}
-		return
-	}
-
 	if encode {
-		if messageInputFile == "" || pictureInputFile == "" || pictureOutputFile == "" {
-			fmt.Println("Error: In order to run in encode mode, you must specify: ")
-			fmt.Println("-i: the plain image that you would like to encode with")
-			fmt.Println("-o: where you would like to store the encodeded image")
-			fmt.Println("-mi: the message that you would like to embed in the image")
-			return
-		}
 		message, err := ioutil.ReadFile(messageInputFile) // Read the message from the message file
 		if err != nil {
 			print("Error reading from file!!!")
@@ -82,14 +61,7 @@ func main() {
 		w := bufio.NewWriter(outFile)
 		w.Write(encodedImg.Bytes())
 
-	}
-
-	if decode {
-
-		if pictureInputFile == "" {
-			fmt.Println("Error: In order to run stego in read mode, you must specify: -im: the image with the embedded message")
-			return
-		}
+	} else if decode {
 
 		inFile, err := os.Open(pictureInputFile)
 		if err != nil {
@@ -100,7 +72,7 @@ func main() {
 		reader := bufio.NewReader(inFile)
 		img, _, err := image.Decode(reader)
 		if err != nil {
-			log.Fatalf("error decoding file", img)
+			log.Fatal("error decoding file", img)
 		}
 
 		sizeOfMessage := steganography.GetSizeOfMessageFromImage(img)
@@ -119,5 +91,18 @@ func main() {
 				fmt.Printf("%c", msg[i])
 			}
 		}
+	} else {
+		if help {
+			fmt.Println("-i: the plain image that you would like to encode with")
+			fmt.Println("-o: where you would like to store the encodeded image")
+			fmt.Println("-mi: the message that you would like to embed in the image")
+
+			fmt.Println("-e: take a message and encodes it into a specified location")
+			fmt.Println("\t+ EX: ./main -e -mi message.txt -i plain.png -o secret.png")
+
+			fmt.Println("-d: take a picture and decodes the message from it")
+			fmt.Println("\t+ EX: ./stego -d -i secret.png -mo secret.txt")
+		}
+		return
 	}
 }
