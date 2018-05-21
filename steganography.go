@@ -1,5 +1,7 @@
 package steganography
 
+// steganography library provides functions to execute steganography encoding and decoding in a given image. It is also able to check the maximum encoding size, and the size of an encoded message.
+
 import (
 	"bufio"
 	"bytes"
@@ -11,8 +13,15 @@ import (
 	"os"
 )
 
-// encodes a given string into the input image using least significant bit encryption
-func EncodeString(message []byte, pictureInputFile image.Image, pictureOutputFile string) bytes.Buffer {
+// EncodeString encodes a given string into the input image using least significant bit encryption (LSB steganography)
+/*
+	Input:
+		message []byte : byte slice of the message to be encoded
+		pictureInputFile image.Image : image data used in encoding
+	Output:
+		bytes buffer ( io.writter ) to create file, or send data.
+*/
+func EncodeString(message []byte, pictureInputFile image.Image) bytes.Buffer {
 	w := new(bytes.Buffer)
 
 	rgbIm := imageToRGBA(pictureInputFile)
@@ -82,7 +91,15 @@ func EncodeString(message []byte, pictureInputFile image.Image, pictureOutputFil
 	return *w
 }
 
-// using LSB steganography, decode the message from the picture and return it as a sequence of bytes
+// DecodeMessageFromPicture using LSB steganography, decode the message from the picture and return it as a sequence of bytes
+/*
+	Input:
+		startOffset uint32 : number of bytes used to declare size of message
+		msgLen uint32 : size of the message to be decoded
+		pictureInputFile image.Image : image data used in decoding
+	Output:
+		message []byte decoded from image
+*/
 func DecodeMessageFromPicture(startOffset uint32, msgLen uint32, pictureInputFile image.Image) (message []byte) {
 
 	var byteIndex uint32 = 0
@@ -157,14 +174,14 @@ func DecodeMessageFromPicture(startOffset uint32, msgLen uint32, pictureInputFil
 	return
 }
 
-// given an image will find how many bytes can be stored in that image using least significant bit encoding
+// MaxEncodeSize given an image will find how many bytes can be stored in that image using least significant bit encoding
 func MaxEncodeSize(img image.Image) uint32 {
 	width := img.Bounds().Dx()
 	height := img.Bounds().Dy()
 	return uint32(((width * height * 3) / 8)) - 4
 }
 
-// gets the size of the message from the first four bytes encoded in the image
+// GetSizeOfMessageFromImage gets the size of the message from the first four bytes encoded in the image
 func GetSizeOfMessageFromImage(pictureInputFile image.Image) (size uint32) {
 
 	sizeAsByteArray := DecodeMessageFromPicture(0, 4, pictureInputFile)
@@ -172,7 +189,7 @@ func GetSizeOfMessageFromImage(pictureInputFile image.Image) (size uint32) {
 	return
 }
 
-// each call will return the next subsequent bit in the string
+// getNextBitFromString each call will return the next subsequent bit in the string
 func getNextBitFromString(byteArray []byte, ch chan byte) {
 
 	var offsetInBytes int = 0
@@ -199,7 +216,7 @@ func getNextBitFromString(byteArray []byte, ch chan byte) {
 	}
 }
 
-// given a byte, will return the least significant bit of that byte
+// getLSB given a byte, will return the least significant bit of that byte
 func getLSB(b byte) byte {
 	if b%2 == 0 {
 		return 0
@@ -208,7 +225,7 @@ func getLSB(b byte) byte {
 	}
 }
 
-// given a byte will set that byte's least significant bit to a given value (where true is 1 and false is 0)
+// setLSB given a byte will set that byte's least significant bit to a given value (where true is 1 and false is 0)
 func setLSB(b *byte, bit byte) {
 	if bit == 1 {
 		*b = *b | 1
@@ -218,7 +235,7 @@ func setLSB(b *byte, bit byte) {
 	}
 }
 
-// given a bit will return a bit from that byte
+// getBitFromByte given a bit will return a bit from that byte
 func getBitFromByte(b byte, indexInByte int) byte {
 	b = b << uint(indexInByte)
 	var mask byte = 0x80
@@ -231,7 +248,7 @@ func getBitFromByte(b byte, indexInByte int) byte {
 	return 0
 }
 
-// sets a specific bit in a byte to a given value and returns the new byte
+// setBitInByte sets a specific bit in a byte to a given value and returns the new byte
 func setBitInByte(b byte, indexInByte uint32, bit byte) byte {
 	var mask byte = 0x80
 	mask = mask >> uint(indexInByte)
@@ -245,7 +262,7 @@ func setBitInByte(b byte, indexInByte uint32, bit byte) byte {
 	return b
 }
 
-// given four bytes, will return the 32 bit unsigned integer which is the composition of those four bytes (one is MSB)
+// combineToInt given four bytes, will return the 32 bit unsigned integer which is the composition of those four bytes (one is MSB)
 func combineToInt(one, two, three, four byte) (ret uint32) {
 	ret = uint32(one)
 	ret = ret << 8
@@ -257,7 +274,7 @@ func combineToInt(one, two, three, four byte) (ret uint32) {
 	return
 }
 
-// given an unsigned integer, will split this integer into its four bytes
+// splitToBytes given an unsigned integer, will split this integer into its four bytes
 func splitToBytes(x uint32) (one, two, three, four byte) {
 	one = byte(x >> 24)
 	var mask uint32 = 255
@@ -283,7 +300,7 @@ func DecodeImage(filename string) image.Image {
 	return img
 }
 
-// convert given image to RGBA image
+// imageToRGBA convert given image to RGBA image
 func imageToRGBA(src image.Image) *image.RGBA {
 	bounds := src.Bounds()
 
