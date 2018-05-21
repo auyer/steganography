@@ -1,6 +1,6 @@
-package steganography
-
 // steganography library provides functions to execute steganography encoding and decoding in a given image. It is also able to check the maximum encoding size, and the size of an encoded message.
+
+package steganography
 
 import (
 	"bufio"
