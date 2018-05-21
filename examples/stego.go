@@ -74,7 +74,7 @@ func main() {
 		reader := bufio.NewReader(inFile)
 		img, name, err := image.Decode(reader)
 		println(name)
-		encodedImg := steganography.EncodeString(message, img, pictureOutputFile) // Encode the message into the image file
+		encodedImg := steganography.EncodeString(message, img) // Encode the message into the image file
 		outFile, err := os.Create(pictureOutputFile)
 		if err != nil {
 			log.Fatalf("Error creating file %s: %v", pictureOutputFile, err)
