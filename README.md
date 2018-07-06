@@ -10,6 +10,8 @@ This librery is inspired by Stego, a command line utility with the same purpose.
 | Original        | Encoded           |
 | -------------------- | ------------------|
 | ![Original File](examples/stegosaurus.png) | ![Encoded File](examples/encoded_stegosaurus.png)
+|   79,955 bytes       |   80,629 bytes   |
+
 The second image contains the first paragaph of the description of a stegosaurus on [Wikipidia](https://en.wikipedia.org/wiki/Stegosaurus), also available in [examples/message.txt](examples/message.txt) as an example.
 
 Encode
@@ -44,5 +46,6 @@ Length mode can be used in order to preform a preliminary check on the carrier i
 img, _, err := image.Decode(reader)
 sizeOfMessage := steganography.GetSizeOfMessageFromImage(img)
 ```
-
-Stegossaurus Picture By Matt Martyniuk - Own work, CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=42215661
+-----
+### Attributions
+ - mStegossaurus Picture By Matt Martyniuk - Own work, CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=42215661
