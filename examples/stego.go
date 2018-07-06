@@ -26,7 +26,7 @@ func init() {
 	flag.BoolVar(&encode, "e", false, "Specifies if you would like to encode a message to a given PNG file")
 
 	flag.StringVar(&pictureInputFile, "i", "", "Path to the the input image")
-	flag.StringVar(&pictureOutputFile, "o", "", "Path to the the output image")
+	flag.StringVar(&pictureOutputFile, "o", "encoded.png", "Path to the the output image")
 
 	flag.StringVar(&messageInputFile, "mi", "", "Path to the message input file")
 	flag.StringVar(&messageOutputFile, "mo", "", "Path to the message output file")
@@ -51,8 +51,8 @@ func main() {
 		defer inFile.Close()
 
 		reader := bufio.NewReader(inFile)
-		img, name, err := image.Decode(reader)
-		println(name)
+		img, _, err := image.Decode(reader)
+		// println(name)
 		encodedImg := steganography.EncodeString(message, img) // Encode the message into the image file
 		outFile, err := os.Create(pictureOutputFile)
 		if err != nil {
