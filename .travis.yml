@@ -4,8 +4,8 @@ go:
   - 1.9.x
   - 1.10.x
   - tip
-install:
-  - make dependency
+# install:
+#   - make dependency
 script:
   - make test
 matrix:
