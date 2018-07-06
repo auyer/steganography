@@ -2,7 +2,15 @@
 
 [![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](http://godoc.org/github.com/auyer/steganography) [![Go Report Card](https://goreportcard.com/badge/github.com/auyer/steganography)](https://goreportcard.com/report/github.com/auyer/steganography) [![LICENSE LGPL](https://img.shields.io/badge/license-GPL3-brightgreen.svg)](https://img.shields.io/badge/license-GPL3-brightgreen.svg) [![Build Status](https://travis-ci.org/auyer/steganography.svg?branch=master)](https://travis-ci.org/auyer/steganography)
 
-Stego is a command line utility written in go to allow simple LSB steganography on PNG images. It is capable of both encoding and decoding images. It can store files of any format.
+Steganography is a library written in Pure go to allow simple LSB steganography on images. It is capable of both encoding and decoding images. It can store files of any format.
+This librery is inspired by Stego, a command line utility with the same purpose.
+
+## Demonstration
+
+| Original        | Encoded           |
+| -------------------- | ------------------|
+| ![Original File](examples/stegosaurus.png) | ![Encoded File](examples/encoded_stegosaurus.png)
+The second image contains the first paragaph of the description of a stegosaurus on [Wikipidia](https://en.wikipedia.org/wiki/Stegosaurus), also available in [examples/message.txt](examples/message.txt) as an example.
 
 Encode
 ------
@@ -36,3 +44,5 @@ Length mode can be used in order to preform a preliminary check on the carrier i
 img, _, err := image.Decode(reader)
 sizeOfMessage := steganography.GetSizeOfMessageFromImage(img)
 ```
+
+Stegossaurus Picture By Matt Martyniuk - Own work, CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=42215661
