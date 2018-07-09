@@ -27,6 +27,10 @@ func TestEncode(t *testing.T) {
 
 	reader := bufio.NewReader(inFile)
 	img, _, err := image.Decode(reader)
+	if err != nil {
+		log.Printf("Error decoding. %v", err)
+		t.FailNow()
+	}
 	// println(name)
 	encodedImg := EncodeString(bitmessage, img) // Encode the message into the image file
 	outFile, err := os.Create(encodedInputFile)
@@ -86,6 +90,14 @@ func TestEncodeDecode(t *testing.T) {
 
 	if !bytes.Equal(msg, bitmessage) {
 		log.Print("messages dont match")
+		t.FailNow()
+	}
+}
+
+func TestEmptyPathHelperFunction(t *testing.T) {
+	_, err := OpenImageFromPath(" ")
+	if err == nil {
+		log.Print("Empty path given, err could not be nil.")
 		t.FailNow()
 	}
 }
