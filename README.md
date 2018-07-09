@@ -1,6 +1,6 @@
 # steganography Lib
 
-[![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](http://godoc.org/github.com/auyer/steganography) [![Go Report Card](https://goreportcard.com/badge/github.com/auyer/steganography)](https://goreportcard.com/report/github.com/auyer/steganography) [![LICENSE LGPL](https://img.shields.io/badge/license-GPL3-brightgreen.svg)](https://img.shields.io/badge/license-GPL3-brightgreen.svg) [![Build Status](https://travis-ci.org/auyer/steganography.svg?branch=master)](https://travis-ci.org/auyer/steganography)
+[![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](http://godoc.org/github.com/auyer/steganography) [![Go Report Card](https://goreportcard.com/badge/github.com/auyer/steganography)](https://goreportcard.com/report/github.com/auyer/steganography) [![LICENSE MIT](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://img.shields.io/badge/license-MIT-brightgreen.svg) [![Build Status](https://travis-ci.org/auyer/steganography.svg?branch=master)](https://travis-ci.org/auyer/steganography)
 
 Steganography is a library written in Pure go to allow simple LSB steganography on images. It is capable of both encoding and decoding images. It can store files of any format.
 This librery is inspired by Stego, a command line utility with the same purpose.
