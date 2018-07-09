@@ -1,9 +1,14 @@
-# steganography Lib
+# Steganography Lib
 
 [![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](http://godoc.org/github.com/auyer/steganography) [![Go Report Card](https://goreportcard.com/badge/github.com/auyer/steganography)](https://goreportcard.com/report/github.com/auyer/steganography) [![LICENSE MIT](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://img.shields.io/badge/license-MIT-brightgreen.svg) [![Build Status](https://travis-ci.org/auyer/steganography.svg?branch=master)](https://travis-ci.org/auyer/steganography)
 
 Steganography is a library written in Pure go to allow simple LSB steganography on images. It is capable of both encoding and decoding images. It can store files of any format.
-This librery is inspired by Stego, a command line utility with the same purpose.
+This library is inspired by Stego, a command line utility with the same purpose.
+
+## Installation
+```go
+go get -u github.com/auyer/steganography
+```
 
 ## Demonstration
 
@@ -14,38 +19,56 @@ This librery is inspired by Stego, a command line utility with the same purpose.
 
 The second image contains the first paragaph of the description of a stegosaurus on [Wikipidia](https://en.wikipedia.org/wiki/Stegosaurus), also available in [examples/message.txt](examples/message.txt) as an example.
 
+
+## Getting Started
+------
+```go
+package main
+import (
+    "bufio"
+    "image"
+    "io/ioutil"
+
+    "github.com/auyer/steganography"
+)
+```
+
 Encode
 ------
 Write mode is used to take a message and embed it into an image file using LSB steganography in order to produce a secret image file that will contain your message.
+
 ```go
-encodedImg := steganography.EncodeString(message, img, pictureOutputFile) // Encode the message into the image file
-outFile, err := os.Create(pictureOutputFile)
-if err != nil {
-    log.Fatalf("Error creating file %s: %v", pictureOutputFile, err)
-}
-w := bufio.NewWriter(outFile)
-w.Write(encodedImg.Bytes())
+inFile, _ := os.Open(file_path)  // reads the File
+img, _, err := image.Decode(reader) // Decodes image
+encodedImg := steganography.EncodeString(message, img) // Encode the message into the provided image file
+outFile, _ := os.Create(pictureOutputFile) // Creates the new file
+bufio.NewWriter(outFile).Write(encodedImg.Bytes()) // writes file into disk
+```
+
+Size of Message
+------
+Length mode can be used in order to preform a preliminary check on the carrier image in order to deduce how large of a file it can store.
+
+```go
+sizeOfMessage := steganography.GetSizeOfMessageFromImage(img) // retrieves the size of the encoded message
 ```
 
 Decode
 -----
 Read mode is used to read an image that has been encoded using LSB steganography, and extract the hidden message from that image.
-```go
-reader := bufio.NewReader(inFile)
-img, _, err := image.Decode(reader)
-sizeOfMessage := steganography.GetSizeOfMessageFromImage(img)
 
-msg := steganography.DecodeMessageFromPicture(4, sizeOfMessage, img) // Read the message from the picture file
+```go
+inFile, _ := os.Open(file_path)  // reads the File
+img, _, err := image.Decode(bufio.NewReader(inFile)) // Decodes image
+sizeOfMessage := steganography.GetSizeOfMessageFromImage(img) // retrieves the size of the encoded message
+
+msg := steganography.DecodeMessageFromPicture(4, sizeOfMessage, img) // Decodes the message from file
 ```
 
-Size of Message
+Complete Example
 ------
-Length mode can be used in order to preform a preliminary check on the carrier image in order to deduce how large of a file it can store. Length is given in bytes, kilobytes, and megabytes.
+For a complete example, see the [examples/stego.go](examples/stego.go) file. It is a command line app based on the original fork of this repository, but modifid to use the Steganography library.
 
-```go
-img, _, err := image.Decode(reader)
-sizeOfMessage := steganography.GetSizeOfMessageFromImage(img)
-```
 -----
 ### Attributions
- - mStegossaurus Picture By Matt Martyniuk - Own work, CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=42215661
+ - Stegossaurus Picture By Matt Martyniuk - Own work, CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=42215661
