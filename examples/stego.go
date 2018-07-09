@@ -20,6 +20,7 @@ var decode bool
 var encode bool
 var help bool
 
+// init creates the necessary flags to run program from the command line
 func init() {
 
 	flag.BoolVar(&decode, "d", false, "Specifies if you would like to decode a message from a given PNG file")
@@ -38,32 +39,30 @@ func init() {
 
 func main() {
 	if encode {
-		message, err := ioutil.ReadFile(messageInputFile) // Read the message from the message file
+		message, err := ioutil.ReadFile(messageInputFile) // Read the message from the message file (alternative to os.Open )
 		if err != nil {
 			print("Error reading from file!!!")
 			return
 		}
 
-		inFile, err := os.Open(pictureInputFile)
+		inFile, err := os.Open(pictureInputFile) // Opens input file provided in the flags
 		if err != nil {
 			log.Fatalf("Error opening file %s: %v", pictureInputFile, err)
 		}
 		defer inFile.Close()
 
-		reader := bufio.NewReader(inFile)
+		reader := bufio.NewReader(inFile) // Reads binary data from picture file
 		img, _, err := image.Decode(reader)
-		// println(name)
-		encodedImg := steganography.EncodeString(message, img) // Encode the message into the image file
-		outFile, err := os.Create(pictureOutputFile)
+		encodedImg := steganography.EncodeString(message, img) // Calls library and Encodes the message into a new buffer
+		outFile, err := os.Create(pictureOutputFile)           // Creates file to write the message into
 		if err != nil {
 			log.Fatalf("Error creating file %s: %v", pictureOutputFile, err)
 		}
-		w := bufio.NewWriter(outFile)
-		w.Write(encodedImg.Bytes())
+		bufio.NewWriter(outFile).Write(encodedImg.Bytes()) // writes file to disk
 
 	} else if decode {
 
-		inFile, err := os.Open(pictureInputFile)
+		inFile, err := os.Open(pictureInputFile) // Opens input file provided in the flags
 		if err != nil {
 			log.Fatalf("Error opening file %s: %v", pictureInputFile, err)
 		}
@@ -75,7 +74,7 @@ func main() {
 			log.Fatal("error decoding file", img)
 		}
 
-		sizeOfMessage := steganography.GetSizeOfMessageFromImage(img)
+		sizeOfMessage := steganography.GetSizeOfMessageFromImage(img) // Uses the library to check the message size
 
 		msg := steganography.DecodeMessageFromPicture(4, sizeOfMessage, img) // Read the message from the picture file
 
