@@ -54,12 +54,12 @@ func main() {
 		reader := bufio.NewReader(inFile) // Reads binary data from picture file
 		img, _, err := image.Decode(reader)
 		if err != nil {
-			log.Fatalf("Error reading file. %v", err)
+			log.Fatalf("Error opening file %v", err)
 		}
 		encodedImg := steganography.EncodeString(message, img) // Calls library and Encodes the message into a new buffer
 		outFile, err := os.Create(pictureOutputFile)           // Creates file to write the message into
 		if err != nil {
-			log.Fatalf("Error creating file %s: %v", inFile, err)
+			log.Fatalf("Error creating file %s: %v", pictureOutputFile, err)
 		}
 		bufio.NewWriter(outFile).Write(encodedImg.Bytes()) // writes file to disk
 
