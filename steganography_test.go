@@ -67,17 +67,11 @@ func TestDecode(t *testing.T) {
 }
 
 func TestEncodeDecode(t *testing.T) {
-	inFile, err := os.Open(rawInputFile)
+	img, err := OpenImageFromPath(rawInputFile)
 	if err != nil {
-		log.Printf("Error opening file %s: %v", rawInputFile, err)
+		log.Printf("Error opening or Decoding file %s: %v", rawInputFile, err)
 		t.FailNow()
-
 	}
-	defer inFile.Close()
-
-	reader := bufio.NewReader(inFile)
-	img, _, err := image.Decode(reader)
-	// println(name)
 	encodedImg := EncodeString(bitmessage, img) // Encode the message into the image file
 
 	img, _, err = image.Decode(bytes.NewReader(encodedImg.Bytes()))

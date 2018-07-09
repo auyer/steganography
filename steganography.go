@@ -1,4 +1,4 @@
-//Package steganography is a library that provides functions to execute steganography encoding and decoding in a given image. It is also able to check the maximum encoding size, and the size of an encoded message.
+// Package steganography is a library that provides functions to execute steganography encoding and decoding in a given image. It is also able to check the maximum encoding size, and the size of an encoded message.
 package steganography
 
 import (
@@ -8,7 +8,6 @@ import (
 	"image/color"
 	"image/draw"
 	"image/png"
-	"log"
 	"os"
 )
 
@@ -283,22 +282,19 @@ func splitToBytes(x uint32) (one, two, three, four byte) {
 	return
 }
 
-// DecodeImage returns a image.Image from a file path. This method is optional.
-func DecodeImage(filename string) image.Image {
+// OpenImageFromPath returns a image.Image from a file path. A helper function to deal with decoding the image into a usable format. This method is optional.
+func OpenImageFromPath(filename string) (image.Image, error) {
 	inFile, err := os.Open(filename)
-
 	if err != nil {
-		log.Fatalf("Error opening file %s: %v", filename, err)
+		return nil, err
 	}
-
 	defer inFile.Close()
 	reader := bufio.NewReader(inFile)
-	img, name, err := image.Decode(reader)
+	img, _, err := image.Decode(reader)
 	if err != nil {
-		log.Fatalf("Error decoding image %s: %v", filename, err)
+		return nil, err
 	}
-	println(name)
-	return img
+	return img, nil
 }
 
 // imageToRGBA convert given image to RGBA image

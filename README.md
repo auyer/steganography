@@ -1,6 +1,6 @@
 # Steganography Lib
 
-[![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](http://godoc.org/github.com/auyer/steganography) [![Go Report Card](https://goreportcard.com/badge/github.com/auyer/steganography)](https://goreportcard.com/report/github.com/auyer/steganography) [![LICENSE MIT](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://img.shields.io/badge/license-MIT-brightgreen.svg) [![Build Status](https://travis-ci.org/auyer/steganography.svg?branch=master)](https://travis-ci.org/auyer/steganography)
+[![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](http://godoc.org/github.com/auyer/steganography) [![Go Report Card](https://goreportcard.com/badge/github.com/auyer/steganography)](https://goreportcard.com/report/github.com/auyer/steganography) [![LICENSE MIT](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://img.shields.io/badge/license-MIT-brightgreen.svg) [![Build Status](https://travis-ci.org/auyer/steganography.svg?branch=master)](https://travis-ci.org/auyer/steganography) [![cover.run](https://cover.run/go/github.com/auyer/steganography.svg?style=flat&tag=golang-1.10)](https://cover.run/go?tag=golang-1.10&repo=github.com%2Fauyer%2Fsteganography)
 
 Steganography is a library written in Pure go to allow simple LSB steganography on images. It is capable of both encoding and decoding images. It can store files of any format.
 This library is inspired by Stego, a command line utility with the same purpose.
@@ -63,6 +63,16 @@ img, _, err := image.Decode(bufio.NewReader(inFile)) // Decodes image
 sizeOfMessage := steganography.GetSizeOfMessageFromImage(img) // retrieves the size of the encoded message
 
 msg := steganography.DecodeMessageFromPicture(4, sizeOfMessage, img) // Decodes the message from file
+```
+
+Open Image From Path
+-----
+If you do not want to deal with opening the image file in your code, there is a helper function for you. It will do the dirty job and return the image in a way usable by the encode and decode fucntions.
+```go
+img, err := OpenImageFromPath(imagePath)
+if err != nil {
+    log.Printf("Error opening or Decoding file %s: %v", imagePath, err)
+}
 ```
 
 Complete Example
