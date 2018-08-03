@@ -81,4 +81,4 @@ For a complete example, see the [examples/stego.go](examples/stego.go) file. It 
 
 -----
 ### Attributions
- - Stegossaurus Picture By Matt Martyniuk - Own work, CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=42215661
+ - Stegosaurus Picture By Matt Martyniuk - Own work, CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=42215661
