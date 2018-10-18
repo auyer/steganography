@@ -27,3 +27,10 @@ jobs:
       - checkout
       - run: go get -v -t -d github.com/auyer/steganography
       - run: go test -v ./...
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
+      - test110
+      - test19
