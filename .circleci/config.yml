@@ -5,7 +5,23 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/golang:1.11
+      - image: circleci/golang:latest
+    working_directory: /go/src/github.com/auyer/steganography
+    steps:
+      - checkout
+      - run: go get -v -t -d github.com/auyer/steganography
+      - run: go test -v ./...
+  test110:
+    docker:
+      - image: circleci/golang:1.10
+    working_directory: /go/src/github.com/auyer/steganography
+    steps:
+      - checkout
+      - run: go get -v -t -d github.com/auyer/steganography
+      - run: go test -v ./...
+  test19:
+    docker:
+      - image: circleci/golang:1.9
     working_directory: /go/src/github.com/auyer/steganography
     steps:
       - checkout
