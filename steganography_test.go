@@ -65,7 +65,7 @@ func TestDecodeFromFile(t *testing.T) {
 
 	sizeOfMessage := GetMessageSizeFromImage(img)
 
-	msg := Decode(4, sizeOfMessage, img) // Read the message from the picture file
+	msg := Decode(sizeOfMessage, img) // Read the message from the picture file
 
 	if !bytes.Equal(msg, bitmessage) {
 		log.Println(string(msg))
@@ -106,7 +106,7 @@ func TestEncodeDecodeGeneratedSmallImage(t *testing.T) {
 
 	sizeOfMessage := GetMessageSizeFromImage(decodeImg)
 
-	msg := Decode(4, sizeOfMessage, decodeImg) // Read the message from the picture file
+	msg := Decode(sizeOfMessage, decodeImg) // Read the message from the picture file
 
 	// otherwise, print the message to STDOUT
 

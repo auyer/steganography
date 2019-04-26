@@ -106,7 +106,7 @@ func Encode(writeBuffer *bytes.Buffer, pictureInputFile image.Image, message []b
 
 }
 
-// DecodeRGBA gets messages from pictures using LSB steganography, decode the message from the picture and return it as a sequence of bytes
+// decodeRGBA gets messages from pictures using LSB steganography, decode the message from the picture and return it as a sequence of bytes
 /*
 	Input:
 		startOffset uint32 : number of bytes used to declare size of message
@@ -115,7 +115,7 @@ func Encode(writeBuffer *bytes.Buffer, pictureInputFile image.Image, message []b
 	Output:
 		message []byte decoded from image
 */
-func DecodeRGBA(startOffset uint32, msgLen uint32, rgbImage *image.RGBA) (message []byte) {
+func decodeRGBA(startOffset uint32, msgLen uint32, rgbImage *image.RGBA) (message []byte) {
 
 	var byteIndex uint32
 	var bitIndex uint32
@@ -187,7 +187,7 @@ func DecodeRGBA(startOffset uint32, msgLen uint32, rgbImage *image.RGBA) (messag
 	return
 }
 
-// Decode gets messages from pictures using LSB steganography, decode the message from the picture and return it as a sequence of bytes
+// decode gets messages from pictures using LSB steganography, decode the message from the picture and return it as a sequence of bytes
 // It wraps EncodeRGBA making the conversion from image.Image to image.RGBA
 /*
 	Input:
@@ -197,10 +197,24 @@ func DecodeRGBA(startOffset uint32, msgLen uint32, rgbImage *image.RGBA) (messag
 	Output:
 		message []byte decoded from image
 */
-func Decode(startOffset uint32, msgLen uint32, pictureInputFile image.Image) (message []byte) {
+func decode(startOffset uint32, msgLen uint32, pictureInputFile image.Image) (message []byte) {
 
 	rgbImage := imageToRGBA(pictureInputFile)
-	return DecodeRGBA(startOffset, msgLen, rgbImage)
+	return decodeRGBA(startOffset, msgLen, rgbImage)
+
+}
+
+// Decode gets messages from pictures using LSB steganography, decode the message from the picture and return it as a sequence of bytes
+// It wraps EncodeRGBA making the conversion from image.Image to image.RGBA
+/*
+	Input:
+		msgLen uint32 : size of the message to be decoded
+		pictureInputFile image.Image : image data used in decoding
+	Output:
+		message []byte decoded from image
+*/
+func Decode(msgLen uint32, pictureInputFile image.Image) (message []byte) {
+	return decode(4, msgLen, pictureInputFile) // the offset of 4 skips the "header" where message lenght is defined
 
 }
 
@@ -220,7 +234,7 @@ func MaxEncodeSize(img image.Image) uint32 {
 // GetMessageSizeFromImage gets the size of the message from the first four bytes encoded in the image
 func GetMessageSizeFromImage(pictureInputFile image.Image) (size uint32) {
 
-	sizeAsByteArray := Decode(0, 4, pictureInputFile)
+	sizeAsByteArray := decode(0, 4, pictureInputFile)
 	size = combineToInt(sizeAsByteArray[0], sizeAsByteArray[1], sizeAsByteArray[2], sizeAsByteArray[3])
 	return
 }

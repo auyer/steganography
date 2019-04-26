@@ -99,7 +99,7 @@ func main() {
 
 		sizeOfMessage := steganography.GetMessageSizeFromImage(img) // Uses the library to check the message size
 
-		msg := steganography.Decode(4, sizeOfMessage, img) // Read the message from the picture file
+		msg := steganography.Decode(sizeOfMessage, img) // Read the message from the picture file
 
 		// if the user specifies a location to write the message to...
 		if messageOutputFile != "" {
