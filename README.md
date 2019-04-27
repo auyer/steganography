@@ -12,7 +12,7 @@ This library is inspired by [Stego by EthanWelsh](https://github.com/EthanWelsh/
 
 ## Installation
 ```go
-go get -u github.com/auyer/steganography
+go get -u gopkg.in/auyer/steganography.v2
 ```
 
 ## Demonstration
@@ -33,7 +33,7 @@ import (
     "image"
     "io/ioutil"
 
-    "github.com/auyer/steganography"
+    "gopkg.in/auyer/steganography.v2"
 )
 ```
 
@@ -88,6 +88,14 @@ fmt.Println(string(msg))
 Complete Example
 ------
 For a complete example, see the [examples/stego.go](examples/stego.go) file. It is a command line app based on the original fork of this repository, but modifid to use the Steganography library.
+
+----
+### V1 Compatibility:
+
+It is highly recommended for past users to upgrade to v2, but old users can still use it with: 
+```
+import "gopkg.in/auyer/steganography.v1"
+```
 
 -----
 ### Attributions
