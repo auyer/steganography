@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"flag"
 	"fmt"
 	"image"
@@ -37,6 +38,21 @@ func init() {
 	flag.Parse()
 }
 
+// OpenImageFromPath returns a image.Image from a file path. A helper function to deal with decoding the image into a usable format. This method is optional.
+func OpenImageFromPath(filename string) (image.Image, error) {
+	inFile, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer inFile.Close()
+	reader := bufio.NewReader(inFile)
+	img, _, err := image.Decode(reader)
+	if err != nil {
+		return nil, err
+	}
+	return img, nil
+}
+
 func main() {
 	if encode {
 		message, err := ioutil.ReadFile(messageInputFile) // Read the message from the message file (alternative to os.Open )
@@ -56,8 +72,12 @@ func main() {
 		if err != nil {
 			log.Fatalf("Error opening file %v", err)
 		}
-		encodedImg := steganography.EncodeString(message, img) // Calls library and Encodes the message into a new buffer
-		outFile, err := os.Create(pictureOutputFile)           // Creates file to write the message into
+		encodedImg := new(bytes.Buffer)
+		err = steganography.Encode(encodedImg, img, message) // Calls library and Encodes the message into a new buffer
+		if err != nil {
+			log.Fatalf("Error encoding message into file  %v", err)
+		}
+		outFile, err := os.Create(pictureOutputFile) // Creates file to write the message into
 		if err != nil {
 			log.Fatalf("Error creating file %s: %v", pictureOutputFile, err)
 		}
@@ -77,9 +97,9 @@ func main() {
 			log.Fatal("error decoding file", img)
 		}
 
-		sizeOfMessage := steganography.GetSizeOfMessageFromImage(img) // Uses the library to check the message size
+		sizeOfMessage := steganography.GetMessageSizeFromImage(img) // Uses the library to check the message size
 
-		msg := steganography.DecodeMessageFromPicture(4, sizeOfMessage, img) // Read the message from the picture file
+		msg := steganography.Decode(sizeOfMessage, img) // Read the message from the picture file
 
 		// if the user specifies a location to write the message to...
 		if messageOutputFile != "" {
