@@ -17,12 +17,11 @@ go get -u github.com/auyer/steganography
 
 ## Demonstration
 
-| Original        | Encoded           |
+| Original              |Encoded           |
 | -------------------- | ------------------|
-| ![Original File](examples/stegosaurus.png) | ![Encoded File](examples/encoded_stegosaurus.png)
-|   79,955 bytes       |   80,629 bytes   |
+| ![Original File](examples/stegosaurus.png)  | ![Encoded File](examples/encoded_stegosaurus.png)
 
-The second image contains the first paragaph of the description of a stegosaurus on [Wikipidia](https://en.wikipedia.org/wiki/Stegosaurus), also available in [examples/message.txt](examples/message.txt) as an example.
+The second image contains the first paragaph of the description of a stegosaurus on [Wikipidia](https://en.wikipedia.org/wiki/Stegosaurus), also available in [examples/message.txt](https://raw.githubusercontent.com/auyer/steganography/master/examples/message.txt) as an example.
 
 ------
 Getting Started
@@ -42,12 +41,22 @@ Encode
 ------
 Write mode is used to take a message and embed it into an image file using LSB steganography in order to produce a secret image file that will contain your message.
 
+Note that the minnimum image size is 24 pixels for one byte. For each additional byte, it is necessary 3 more pixels.
+
 ```go
-inFile, _ := os.Open(file_path)  // reads the File
-img, _, err := image.Decode(reader) // Decodes image
-encodedImg := steganography.EncodeString(message, img) // Encode the message into the provided image file
-outFile, _ := os.Create(pictureOutputFile) // Creates the new file
-bufio.NewWriter(outFile).Write(encodedImg.Bytes()) // writes file into disk
+inFile, _ := os.Open("input_file.png") // opening file
+reader := bufio.NewReader(inFile)   // buffer reader 
+img, _, _ := image.Decode(reader)   // decoding to golang's image.Image
+
+w := new(bytes.Buffer)   // buffer that will recieve the results
+err := steganography.Encode(w, img, "message") // Encode the message into the image
+if err != nil {
+    log.Printf("Error Encoding file %v", err)
+    return
+}
+outFile, _ := os.Create("out_file.png") // create file
+w.WriteTo(outFile) // write buffer to it
+outFile.Close()
 ```
 
 Size of Message
@@ -55,7 +64,7 @@ Size of Message
 Length mode can be used in order to preform a preliminary check on the carrier image in order to deduce how large of a file it can store.
 
 ```go
-sizeOfMessage := steganography.GetSizeOfMessageFromImage(img) // retrieves the size of the encoded message
+sizeOfMessage := GetMessageSizeFromImage(img) // retrieves the size of the encoded message
 ```
 
 Decode
@@ -63,21 +72,17 @@ Decode
 Read mode is used to read an image that has been encoded using LSB steganography, and extract the hidden message from that image.
 
 ```go
-inFile, _ := os.Open(file_path)  // reads the File
-img, _, err := image.Decode(bufio.NewReader(inFile)) // Decodes image
-sizeOfMessage := steganography.GetSizeOfMessageFromImage(img) // retrieves the size of the encoded message
+inFile, _ := os.Open(encodedInputFile) // opening file
+inFile.Close()
 
-msg := steganography.DecodeMessageFromPicture(4, sizeOfMessage, img) // Decodes the message from file
-```
+reader := bufio.NewReader(inFile) // buffer reader 
+img, _, _ := image.Decode(reader) // decoding to golang's image.Image
 
-Open Image From Path
------
-If you do not want to deal with opening the image file in your code, there is a helper function for you. It will do the dirty job and return the image in a way usable by the encode and decode fucntions.
-```go
-img, err := OpenImageFromPath(imagePath)
-if err != nil {
-    log.Printf("Error opening or Decoding file %s: %v", imagePath, err)
-}
+sizeOfMessage := GetMessageSizeFromImage(img) // retrieving message size to decode in the next line
+
+msg := Decode(sizeOfMessage, img) // decoding the message from the file
+fmt.Println(string(msg))
+
 ```
 
 Complete Example
