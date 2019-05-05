@@ -114,17 +114,17 @@ func main() {
 			}
 		}
 	} else {
-		if help {
-			fmt.Println("-i: the plain image that you would like to encode with")
-			fmt.Println("-o: where you would like to store the encodeded image")
-			fmt.Println("-mi: the message that you would like to embed in the image")
-
-			fmt.Println("-e: take a message and encodes it into a specified location")
-			fmt.Println("\t+ EX: ./main -e -mi message.txt -i plain.png -o secret.png")
-
-			fmt.Println("-d: take a picture and decodes the message from it")
-			fmt.Println("\t+ EX: ./stego -d -i secret.png -mo secret.txt")
-		}
+		fmt.Println("How to use this script:")
+		fmt.Println("-i: the input image to encode in / decode from")
+		fmt.Println()
+		fmt.Println("-e: take a message and encodes it into a specified location")
+		fmt.Println("-mi: input message to for the encoding option 			(ENCODING ONLY)")
+		fmt.Println("-o: where you would like to store the encodeded image		(ENCODING ONLY)")
+		fmt.Println("\t+ EX: ./main -e -i plain.png -mi message.txt  -o secret.png")
+		fmt.Println()
+		fmt.Println("-d: take a picture and decodes the message from it")
+		fmt.Println("-mo: output message. Lempty for STDIO			(DECODING ONLY)")
+		fmt.Println("\t+ EX: ./stego -d -i secret.png -mo secret.txt")
 		return
 	}
 }
