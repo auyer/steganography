@@ -49,7 +49,7 @@ reader := bufio.NewReader(inFile)   // buffer reader
 img, _, _ := image.Decode(reader)   // decoding to golang's image.Image
 
 w := new(bytes.Buffer)   // buffer that will recieve the results
-err := steganography.Encode(w, img, "message") // Encode the message into the image
+err := steganography.Encode(w, img, []byte("message")) // Encode the message into the image
 if err != nil {
     log.Printf("Error Encoding file %v", err)
     return
