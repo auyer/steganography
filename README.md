@@ -30,7 +30,7 @@ Getting Started
 package main
 import (
     "bufio"
-    "image"
+    "image/png"
     "io/ioutil"
 
     "gopkg.in/auyer/steganography.v2"
@@ -46,7 +46,7 @@ Note that the minnimum image size is 24 pixels for one byte. For each additional
 ```go
 inFile, _ := os.Open("input_file.png") // opening file
 reader := bufio.NewReader(inFile)   // buffer reader 
-img, _, _ := image.Decode(reader)   // decoding to golang's image.Image
+img, _ := png.Decode(reader)   // decoding to golang's image.Image
 
 w := new(bytes.Buffer)   // buffer that will recieve the results
 err := steganography.Encode(w, img, []byte("message")) // Encode the message into the image
@@ -58,6 +58,7 @@ outFile, _ := os.Create("out_file.png") // create file
 w.WriteTo(outFile) // write buffer to it
 outFile.Close()
 ```
+note: all error checks were removed for brevity, but they should be included.
 
 Size of Message
 ------
@@ -73,10 +74,10 @@ Read mode is used to read an image that has been encoded using LSB steganography
 
 ```go
 inFile, _ := os.Open(encodedInputFile) // opening file
-inFile.Close()
+defer inFile.Close()
 
 reader := bufio.NewReader(inFile) // buffer reader 
-img, _, _ := image.Decode(reader) // decoding to golang's image.Image
+img, _ := png.Decode(reader) // decoding to golang's image.Image
 
 sizeOfMessage := GetMessageSizeFromImage(img) // retrieving message size to decode in the next line
 
@@ -84,6 +85,7 @@ msg := Decode(sizeOfMessage, img) // decoding the message from the file
 fmt.Println(string(msg))
 
 ```
+note: all error checks were removed for brevity, but they should be included.
 
 Complete Example
 ------
@@ -92,7 +94,7 @@ For a complete example, see the [examples/stego.go](examples/stego.go) file. It 
 ----
 ### V1 Compatibility:
 
-It is highly recommended for past users to upgrade to v2, but old users can still use it with: 
+It is highly recommended for past users to upgrade to v2, but users can still use the v1 release with: 
 ```
 import "gopkg.in/auyer/steganography.v1"
 ```
