@@ -5,7 +5,7 @@
 [![LICENSE MIT](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://img.shields.io/badge/license-MIT-brightgreen.svg)
 [![CircleCI](https://circleci.com/gh/auyer/steganography.svg?style=svg)](https://circleci.com/gh/auyer/steganography)
 [![codecov](https://codecov.io/gh/auyer/steganography/branch/master/graph/badge.svg)](https://codecov.io/gh/auyer/steganography)
-[![Awesome Go](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)](https://github.com/avelino/awesome-go)
+[![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go) 
 
 Steganography is a library written in Pure go to allow simple LSB steganography on images. It is capable of both encoding and decoding images. It can store files of any format.
 This library is inspired by [Stego by EthanWelsh](https://github.com/EthanWelsh/Stego), a command line utility with the same purpose.
