@@ -21,7 +21,7 @@ go get -u gopkg.in/auyer/steganography.v2
 | -------------------- | ------------------|
 | ![Original File](examples/stegosaurus.png)  | ![Encoded File](examples/encoded_stegosaurus.png)
 
-The second image contains the first paragaph of the description of a stegosaurus on [Wikipidia](https://en.wikipedia.org/wiki/Stegosaurus), also available in [examples/message.txt](https://raw.githubusercontent.com/auyer/steganography/master/examples/message.txt) as an example.
+The second image contains the first paragaph of the description of a stegosaurus on [Wikipedia](https://en.wikipedia.org/wiki/Stegosaurus), also available in [examples/message.txt](https://raw.githubusercontent.com/auyer/steganography/master/examples/message.txt) as an example.
 
 ------
 Getting Started
