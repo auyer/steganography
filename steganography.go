@@ -214,7 +214,7 @@ func decode(startOffset uint32, msgLen uint32, pictureInputFile image.Image) (me
 		message []byte decoded from image
 */
 func Decode(msgLen uint32, pictureInputFile image.Image) (message []byte) {
-	return decode(4, msgLen, pictureInputFile) // the offset of 4 skips the "header" where message lenght is defined
+	return decode(4, msgLen, pictureInputFile) // the offset of 4 skips the "header" where message length is defined
 
 }
 
