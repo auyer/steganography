@@ -12,7 +12,7 @@ This library is inspired by [Stego by EthanWelsh](https://github.com/EthanWelsh/
 
 ## Installation
 ```go
-go get -u gopkg.in/auyer/steganography.v2
+go get -u github.com/auyer/steganography
 ```
 
 ## Demonstration
@@ -33,7 +33,7 @@ import (
     "image/png"
     "io/ioutil"
 
-    "gopkg.in/auyer/steganography.v2"
+    "github.com/auyer/steganography"
 )
 ```
 
@@ -65,7 +65,7 @@ Size of Message
 Length mode can be used in order to preform a preliminary check on the carrier image in order to deduce how large of a file it can store.
 
 ```go
-sizeOfMessage := GetMessageSizeFromImage(img) // retrieves the size of the encoded message
+sizeOfMessage := steganography.GetMessageSizeFromImage(img) // retrieves the size of the encoded message
 ```
 
 Decode
@@ -79,9 +79,9 @@ defer inFile.Close()
 reader := bufio.NewReader(inFile) // buffer reader 
 img, _ := png.Decode(reader) // decoding to golang's image.Image
 
-sizeOfMessage := GetMessageSizeFromImage(img) // retrieving message size to decode in the next line
+sizeOfMessage := steganography.GetMessageSizeFromImage(img) // retrieving message size to decode in the next line
 
-msg := Decode(sizeOfMessage, img) // decoding the message from the file
+msg := steganography.Decode(sizeOfMessage, img) // decoding the message from the file
 fmt.Println(string(msg))
 
 ```
@@ -90,14 +90,6 @@ note: all error checks were removed for brevity, but they should be included.
 Complete Example
 ------
 For a complete example, see the [examples/stego.go](examples/stego.go) file. It is a command line app based on the original fork of this repository, but modifid to use the Steganography library.
-
-----
-### V1 Compatibility:
-
-It is highly recommended for past users to upgrade to v2, but users can still use the v1 release with: 
-```
-import "gopkg.in/auyer/steganography.v1"
-```
 
 -----
 ### Attributions
