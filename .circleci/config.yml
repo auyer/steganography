@@ -3,7 +3,7 @@
 # Check https://circleci.com/docs/2.0/language-go/ for more details
 version: 2.1
 orbs:
-  codecov: codecov/codecov@1.0.4
+  codecov: codecov/codecov@1.0.5
 jobs:
   build:
     docker:
@@ -11,7 +11,6 @@ jobs:
     working_directory: /go/src/github.com/auyer/steganography
     steps:
       - checkout
-      - run: go get -v -t -d github.com/auyer/steganography
       - run: go test -v ./... -coverprofile=coverage.txt -covermode=atomic
       - codecov/upload:
         file: coverage.txt
@@ -21,7 +20,6 @@ jobs:
     working_directory: /go/src/github.com/auyer/steganography
     steps:
       - checkout
-      - run: go get -v -t -d github.com/auyer/steganography
       - run: go test -v ./...
   test19:
     docker:
@@ -29,7 +27,6 @@ jobs:
     working_directory: /go/src/github.com/auyer/steganography
     steps:
       - checkout
-      - run: go get -v -t -d github.com/auyer/steganography
       - run: go test -v ./...
 workflows:
   version: 2
