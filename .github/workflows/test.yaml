@@ -1,0 +1,44 @@
+name: Unit
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go: [ '^1.16', '~1.12' ]
+    name: Go ${{ matrix.go }} sample
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+    
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go }}
+  
+      - name: Run Race tests
+        run: |
+          go test --race
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+    
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: "^1.16"
+
+      - name: Run tests with Coverage report
+        run: |
+          go test -coverprofile=coverage.txt -covermode=atomic
+
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v2
+        with:
+          file: ./coverage.txt
