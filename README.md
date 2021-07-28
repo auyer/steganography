@@ -3,7 +3,7 @@
 [![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](http://godoc.org/github.com/auyer/steganography)
 [![Go Report Card](https://goreportcard.com/badge/github.com/auyer/steganography)](https://goreportcard.com/report/github.com/auyer/steganography)
 [![LICENSE MIT](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://img.shields.io/badge/license-MIT-brightgreen.svg)
-[![CircleCI](https://circleci.com/gh/auyer/steganography.svg?style=svg)](https://circleci.com/gh/auyer/steganography)
+[![Actions CI](https://github.com/auyer/steganography/actions/workflows/test.yaml/badge.svg)](https://github.com/auyer/steganography/actions)
 [![codecov](https://codecov.io/gh/auyer/steganography/branch/master/graph/badge.svg)](https://codecov.io/gh/auyer/steganography)
 [![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go) 
 
