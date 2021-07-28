@@ -144,7 +144,7 @@ func TestEncodeDecodeGeneratedSmallImage(t *testing.T) {
 	upLeft := image.Point{0, 0}
 	lowRight := image.Point{width, height}
 
-	newimg := image.NewRGBA(image.Rectangle{upLeft, lowRight})
+	newimg := image.NewNRGBA(image.Rectangle{upLeft, lowRight})
 
 	// Set color for each pixel.
 	for x := 0; x < width; x++ {
@@ -154,7 +154,7 @@ func TestEncodeDecodeGeneratedSmallImage(t *testing.T) {
 	}
 
 	w := new(bytes.Buffer)
-	err := EncodeRGBA(w, newimg, []uint8{84, 84, 84}) // Encode the message into the image file
+	err := EncodeNRGBA(w, newimg, []uint8{84, 84, 84}) // Encode the message into the image file
 	if err != nil {
 		log.Printf("Error Encoding file %v", err)
 		t.FailNow()
@@ -180,14 +180,14 @@ func TestEncodeDecodeGeneratedSmallImage(t *testing.T) {
 }
 func TestSmalImage(t *testing.T) {
 
-	miniImage := image.Image(image.NewRGBA(image.Rectangle{image.Point{0, 0}, image.Point{18, 1}}))
+	miniImage := image.Image(image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{18, 1}}))
 	log.Print(MaxEncodeSize(miniImage))
 	if MaxEncodeSize(miniImage) > 0 {
 		log.Printf("Uncaught small image size")
 		t.FailNow()
 	}
 
-	miniImage = image.Image(image.NewRGBA(image.Rectangle{image.Point{0, 0}, image.Point{23, 1}}))
+	miniImage = image.Image(image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{23, 1}}))
 
 	if MaxEncodeSize(miniImage) != 4 {
 		log.Printf("Uncaught minimal image size")
@@ -197,7 +197,7 @@ func TestSmalImage(t *testing.T) {
 
 func TestMessageTooLarge(t *testing.T) {
 
-	miniImage := image.Image(image.NewRGBA(image.Rectangle{image.Point{0, 0}, image.Point{24, 1}}))
+	miniImage := image.Image(image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{24, 1}}))
 	w := new(bytes.Buffer)
 	err := Encode(w, miniImage, bitmessage) // Encode the message into the image file
 	if err == nil {

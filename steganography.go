@@ -11,23 +11,23 @@ import (
 	"image/png"
 )
 
-// EncodeRGBA encodes a given string into the input image using least significant bit encryption (LSB steganography)
+// EncodeNRGBA encodes a given string into the input image using least significant bit encryption (LSB steganography)
 // The minnimum image size is 24 pixels for one byte. For each additional byte, it is necessary 3 more pixels.
 /*
 	Input:
 		writeBuffer *bytes.Buffer : the destination of the encoded image bytes
-		pictureInputFile image.RGBA : image data used in encoding
+		pictureInputFile image.NRGBA : image data used in encoding
 		message []byte : byte slice of the message to be encoded
 	Output:
 		bytes buffer ( io.writter ) to create file, or send data.
 */
-func EncodeRGBA(writeBuffer *bytes.Buffer, rgbImage *image.RGBA, message []byte) error {
+func EncodeNRGBA(writeBuffer *bytes.Buffer, rgbImage *image.NRGBA, message []byte) error {
 
 	var messageLength = uint32(len(message))
 
 	var width = rgbImage.Bounds().Dx()
 	var height = rgbImage.Bounds().Dy()
-	var c color.RGBA
+	var c color.NRGBA
 	var bit byte
 	var ok bool
 	//var encodedImage image.Image
@@ -49,12 +49,12 @@ func EncodeRGBA(writeBuffer *bytes.Buffer, rgbImage *image.RGBA, message []byte)
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
 
-			c = rgbImage.RGBAAt(x, y) // get the color at this pixel
+			c = rgbImage.NRGBAAt(x, y) // get the color at this pixel
 
 			/*  RED  */
 			bit, ok = <-ch
 			if !ok { // if we don't have any more bits left in our message
-				rgbImage.SetRGBA(x, y, c)
+				rgbImage.SetNRGBA(x, y, c)
 				png.Encode(writeBuffer, rgbImage)
 				// return *writeBuffer, nil
 			}
@@ -63,7 +63,7 @@ func EncodeRGBA(writeBuffer *bytes.Buffer, rgbImage *image.RGBA, message []byte)
 			/*  GREEN  */
 			bit, ok = <-ch
 			if !ok {
-				rgbImage.SetRGBA(x, y, c)
+				rgbImage.SetNRGBA(x, y, c)
 				png.Encode(writeBuffer, rgbImage)
 				return nil
 			}
@@ -72,13 +72,13 @@ func EncodeRGBA(writeBuffer *bytes.Buffer, rgbImage *image.RGBA, message []byte)
 			/*  BLUE  */
 			bit, ok = <-ch
 			if !ok {
-				rgbImage.SetRGBA(x, y, c)
+				rgbImage.SetNRGBA(x, y, c)
 				png.Encode(writeBuffer, rgbImage)
 				return nil
 			}
 			setLSB(&c.B, bit)
 
-			rgbImage.SetRGBA(x, y, c)
+			rgbImage.SetNRGBA(x, y, c)
 		}
 	}
 
@@ -89,7 +89,7 @@ func EncodeRGBA(writeBuffer *bytes.Buffer, rgbImage *image.RGBA, message []byte)
 
 // Encode encodes a given string into the input image using least significant bit encryption (LSB steganography)
 // The minnimum image size is 23 pixels
-// It wraps EncodeRGBA making the conversion from image.Image to image.RGBA
+// It wraps EncodeNRGBA making the conversion from image.Image to image.NRGBA
 /*
 	Input:
 		writeBuffer *bytes.Buffer : the destination of the encoded image bytes
@@ -100,22 +100,22 @@ func EncodeRGBA(writeBuffer *bytes.Buffer, rgbImage *image.RGBA, message []byte)
 */
 func Encode(writeBuffer *bytes.Buffer, pictureInputFile image.Image, message []byte) error {
 
-	rgbImage := imageToRGBA(pictureInputFile)
+	rgbImage := imageToNRGBA(pictureInputFile)
 
-	return EncodeRGBA(writeBuffer, rgbImage, message)
+	return EncodeNRGBA(writeBuffer, rgbImage, message)
 
 }
 
-// decodeRGBA gets messages from pictures using LSB steganography, decode the message from the picture and return it as a sequence of bytes
+// decodeNRGBA gets messages from pictures using LSB steganography, decode the message from the picture and return it as a sequence of bytes
 /*
 	Input:
 		startOffset uint32 : number of bytes used to declare size of message
 		msgLen uint32 : size of the message to be decoded
-		pictureInputFile image.RGBA : image data used in decoding
+		pictureInputFile image.NRGBA : image data used in decoding
 	Output:
 		message []byte decoded from image
 */
-func decodeRGBA(startOffset uint32, msgLen uint32, rgbImage *image.RGBA) (message []byte) {
+func decodeNRGBA(startOffset uint32, msgLen uint32, rgbImage *image.NRGBA) (message []byte) {
 
 	var byteIndex uint32
 	var bitIndex uint32
@@ -123,7 +123,7 @@ func decodeRGBA(startOffset uint32, msgLen uint32, rgbImage *image.RGBA) (messag
 	width := rgbImage.Bounds().Dx()
 	height := rgbImage.Bounds().Dy()
 
-	var c color.RGBA
+	var c color.NRGBA
 	var lsb byte
 
 	message = append(message, 0)
@@ -132,7 +132,7 @@ func decodeRGBA(startOffset uint32, msgLen uint32, rgbImage *image.RGBA) (messag
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
 
-			c = rgbImage.RGBAAt(x, y) // get the color of the pixel
+			c = rgbImage.NRGBAAt(x, y) // get the color of the pixel
 
 			/*  RED  */
 			lsb = getLSB(c.R)                                                    // get the least significant bit from the red component of this pixel
@@ -188,7 +188,7 @@ func decodeRGBA(startOffset uint32, msgLen uint32, rgbImage *image.RGBA) (messag
 }
 
 // decode gets messages from pictures using LSB steganography, decode the message from the picture and return it as a sequence of bytes
-// It wraps EncodeRGBA making the conversion from image.Image to image.RGBA
+// It wraps EncodeNRGBA making the conversion from image.Image to image.NRGBA
 /*
 	Input:
 		startOffset uint32 : number of bytes used to declare size of message
@@ -199,13 +199,13 @@ func decodeRGBA(startOffset uint32, msgLen uint32, rgbImage *image.RGBA) (messag
 */
 func decode(startOffset uint32, msgLen uint32, pictureInputFile image.Image) (message []byte) {
 
-	rgbImage := imageToRGBA(pictureInputFile)
-	return decodeRGBA(startOffset, msgLen, rgbImage)
+	rgbImage := imageToNRGBA(pictureInputFile)
+	return decodeNRGBA(startOffset, msgLen, rgbImage)
 
 }
 
 // Decode gets messages from pictures using LSB steganography, decode the message from the picture and return it as a sequence of bytes
-// It wraps EncodeRGBA making the conversion from image.Image to image.RGBA
+// It wraps EncodeNRGBA making the conversion from image.Image to image.NRGBA
 /*
 	Input:
 		msgLen uint32 : size of the message to be decoded
@@ -334,17 +334,17 @@ func splitToBytes(x uint32) (one, two, three, four byte) {
 	return
 }
 
-// imageToRGBA converts image.Image to image.RGBA
-func imageToRGBA(src image.Image) *image.RGBA {
+// imageToNRGBA converts image.Image to image.NRGBA
+func imageToNRGBA(src image.Image) *image.NRGBA {
 	bounds := src.Bounds()
 
-	var m *image.RGBA
+	var m *image.NRGBA
 	var width, height int
 
 	width = bounds.Dx()
 	height = bounds.Dy()
 
-	m = image.NewRGBA(image.Rect(0, 0, width, height))
+	m = image.NewNRGBA(image.Rect(0, 0, width, height))
 
 	draw.Draw(m, m.Bounds(), src, bounds.Min, draw.Src)
 	return m
