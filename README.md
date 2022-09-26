@@ -21,7 +21,7 @@ go get -u github.com/auyer/steganography
 | -------------------- | ------------------|
 | ![Original File](examples/stegosaurus.png)  | ![Encoded File](examples/encoded_stegosaurus.png)
 
-The second image contains the first paragaph of the description of a stegosaurus on [Wikipedia](https://en.wikipedia.org/wiki/Stegosaurus), also available in [examples/message.txt](https://raw.githubusercontent.com/auyer/steganography/master/examples/message.txt) as an example.
+The second image contains the first paragraph of the description of a stegosaurus on [Wikipedia](https://en.wikipedia.org/wiki/Stegosaurus), also available in [examples/message.txt](https://raw.githubusercontent.com/auyer/steganography/master/examples/message.txt) as an example.
 
 ------
 Getting Started
@@ -41,7 +41,7 @@ Encode
 ------
 Write mode is used to take a message and embed it into an image file using LSB steganography in order to produce a secret image file that will contain your message.
 
-Note that the minnimum image size is 24 pixels for one byte. For each additional byte, it is necessary 3 more pixels.
+Note that the minimum image size is 24 pixels for one byte. For each additional byte, it is necessary 3 more pixels.
 
 ```go
 inFile, _ := os.Open("input_file.png") // opening file
@@ -89,7 +89,7 @@ note: all error checks were removed for brevity, but they should be included.
 
 Complete Example
 ------
-For a complete example, see the [examples/stego.go](examples/stego.go) file. It is a command line app based on the original fork of this repository, but modifid to use the Steganography library.
+For a complete example, see the [examples/stego.go](examples/stego.go) file. It is a command line app based on the original fork of this repository, but modified to use the Steganography library.
 
 -----
 ### Attributions
