@@ -4,7 +4,6 @@ package steganography
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -54,9 +53,9 @@ func EncodeNRGBA(writeBuffer *bytes.Buffer, rgbImage *image.NRGBA, message []byt
 			/*  RED  */
 			bit, ok = <-ch
 			if !ok { // if we don't have any more bits left in our message
+
 				rgbImage.SetNRGBA(x, y, c)
-				png.Encode(writeBuffer, rgbImage)
-				// return *writeBuffer, nil
+				break
 			}
 			setLSB(&c.R, bit)
 
@@ -64,8 +63,7 @@ func EncodeNRGBA(writeBuffer *bytes.Buffer, rgbImage *image.NRGBA, message []byt
 			bit, ok = <-ch
 			if !ok {
 				rgbImage.SetNRGBA(x, y, c)
-				png.Encode(writeBuffer, rgbImage)
-				return nil
+				break
 			}
 			setLSB(&c.G, bit)
 
@@ -73,8 +71,7 @@ func EncodeNRGBA(writeBuffer *bytes.Buffer, rgbImage *image.NRGBA, message []byt
 			bit, ok = <-ch
 			if !ok {
 				rgbImage.SetNRGBA(x, y, c)
-				png.Encode(writeBuffer, rgbImage)
-				return nil
+				break
 			}
 			setLSB(&c.B, bit)
 
@@ -83,7 +80,6 @@ func EncodeNRGBA(writeBuffer *bytes.Buffer, rgbImage *image.NRGBA, message []byt
 	}
 
 	err := png.Encode(writeBuffer, rgbImage)
-	fmt.Println("err")
 	return err
 }
 
