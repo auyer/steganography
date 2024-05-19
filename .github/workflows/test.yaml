@@ -1,4 +1,4 @@
-name: Unit
+name: Unit Tests & Coverage
 
 on:
   workflow_dispatch:
@@ -9,14 +9,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go: [ '^1.20', '^1.19', '~1.18', '~1.17', '~1.16', '~1.15', '~1.14', '~1.13', '~1.12' ]
+        go: [ 'stable', '^1.22', '^1.21', '^1.20', '^1.19', '~1.18', '~1.17', '~1.16', '~1.15', '~1.14', '~1.13', '~1.12' ]
     name: Go ${{ matrix.go }} sample
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
     
       - name: Install Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go }}
   
@@ -27,18 +27,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
     
       - name: Install Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
-          go-version: "^1.20"
+          go-version: "stable"
 
       - name: Run tests with Coverage report
         run: |
           go test -coverprofile=coverage.txt -covermode=atomic
 
       - name: Upload coverage report
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           file: ./coverage.txt
