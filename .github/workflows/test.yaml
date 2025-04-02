@@ -9,7 +9,22 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go: [ 'stable', '^1.22', '^1.21', '^1.20', '^1.19', '~1.18', '~1.17', '~1.16', '~1.15', '~1.14', '~1.13', '~1.12' ]
+        go: [ 
+          'stable', 
+          '^1.24', 
+          '^1.23', 
+          '^1.22', 
+          '^1.21', 
+          '^1.20', 
+          '^1.19', 
+          '~1.18', 
+          '~1.17',
+          '~1.16',
+          '~1.15',
+          '~1.14',
+          '~1.13',
+          '~1.12'
+        ]
     name: Go ${{ matrix.go }} sample
     steps:
       - name: Checkout repo
@@ -23,6 +38,7 @@ jobs:
       - name: Run Race tests
         run: |
           go test --race
+
   coverage:
     runs-on: ubuntu-latest
     steps:
@@ -39,6 +55,6 @@ jobs:
           go test -coverprofile=coverage.txt -covermode=atomic
 
       - name: Upload coverage report
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           file: ./coverage.txt
