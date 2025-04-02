@@ -39,15 +39,19 @@ func TestEncodeFromPngFile(t *testing.T) {
 	if err != nil {
 		log.Printf("Error Encoding file %v", err)
 		t.FailNow()
-
 	}
+
 	outFile, err := os.Create(encodedInputFilePng)
 	if err != nil {
 		log.Printf("Error creating file %s: %v", encodedInputFilePng, err)
 		t.FailNow()
-
 	}
-	w.WriteTo(outFile)
+
+	_, err = w.WriteTo(outFile)
+	if err != nil {
+		log.Printf("Error writing file %s: %v", encodedInputFilePng, err)
+		t.FailNow()
+	}
 	defer outFile.Close()
 }
 
@@ -57,8 +61,8 @@ func TestEncodeFromJpgFile(t *testing.T) {
 	if err != nil {
 		log.Printf("Error opening file %s: %v", rawInputFileJpg, err)
 		t.FailNow()
-
 	}
+
 	defer inFile.Close()
 
 	reader := bufio.NewReader(inFile)
@@ -67,20 +71,25 @@ func TestEncodeFromJpgFile(t *testing.T) {
 		log.Printf("Error decoding. %v", err)
 		t.FailNow()
 	}
+
 	w := new(bytes.Buffer)
 	err = Encode(w, img, bitmessage) // Encode the message into the image file
 	if err != nil {
 		log.Printf("Error Encoding file %v", err)
 		t.FailNow()
-
 	}
+
 	outFile, err := os.Create(encodedInputFileJpg)
 	if err != nil {
 		log.Printf("Error creating file %s: %v", encodedInputFileJpg, err)
 		t.FailNow()
-
 	}
-	w.WriteTo(outFile)
+
+	_, err = w.WriteTo(outFile)
+	if err != nil {
+		log.Printf("Error writing file %s: %v", encodedInputFilePng, err)
+		t.FailNow()
+	}
 	defer outFile.Close()
 }
 
