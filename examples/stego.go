@@ -6,7 +6,6 @@ import (
 	"flag"
 	"fmt"
 	"image"
-	"io/ioutil"
 	"log"
 	"os"
 
@@ -55,7 +54,7 @@ func OpenImageFromPath(filename string) (image.Image, error) {
 
 func main() {
 	if encode {
-		message, err := ioutil.ReadFile(messageInputFile) // Read the message from the message file (alternative to os.Open )
+		message, err := os.ReadFile(messageInputFile) // Read the message from the message file (alternative to os.Open )
 		if err != nil {
 			print("Error reading from file!!!")
 			return
@@ -103,7 +102,7 @@ func main() {
 
 		// if the user specifies a location to write the message to...
 		if messageOutputFile != "" {
-			err := ioutil.WriteFile(messageOutputFile, msg, 0644) // write the message to the given output file
+			err := os.WriteFile(messageOutputFile, msg, 0644) // write the message to the given output file
 
 			if err != nil {
 				fmt.Println("There was an error writing to file: ", messageOutputFile)
